@@ -132,6 +132,11 @@ model User {
   activities     Activity[]
   notifications  Notification[]
   auditLogs      AuditLog[]
+  qualityTests   QualityTest[]
+  ticketComments TicketComment[]
+  documentsUploaded Document[]
+  salesTargets   SalesTarget[]
+  commissions    Commission[]
 }
 
 model UserProfile {
@@ -184,6 +189,14 @@ model Connection {
   paymentTermsDays   Int?             @default(0)
   hasColdStorage     Boolean?         @default(false)
   deliveryPreferences String?
+  procurements       MilkProcurementEntry[]
+  salesInquiries     SalesInquiry[]
+  quotations         Quotation[]
+  salesOrders        SalesOrder[]
+  purchaseOrders     PurchaseOrder[]
+  bills              Bill[]
+  supportTickets     SupportTicket[]
+  supplierFeedbacks  SupplierFeedback[]
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
 }
@@ -232,6 +245,9 @@ model Product {
   inventoryStocks    InventoryStock[]
   orderItems         OrderItem[]
   productionBatches  ProductionBatchItem[]
+  productionBatchesByProduct ProductionBatch[]
+  quoteLineItems     QuoteLineItem[]
+  salesInquiries     SalesInquiry[]
 }
 
 model ProductPriceHistory {
@@ -301,6 +317,8 @@ model ProductionBatch {
   expiryDate       DateTime?
   status           ProductionStatus       @default(IN_PRODUCTION)
   items            ProductionBatchItem[]
+  orderItems       OrderItem[]
+  inventoryStocks  InventoryStock[]
 }
 
 model ProductionBatchItem {
@@ -382,6 +400,7 @@ model SalesOrder {
   vehicleReq     String?
   createdAt      DateTime  @default(now())
   items          OrderItem[]
+  invoices       Invoice[]
 }
 
 model OrderItem {
