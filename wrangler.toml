@@ -1,0 +1,14 @@
+name = "prisma-d1-example"
+main = "src/index.ts"
+compatibility_date = "2024-03-20"
+compatibility_flags = ["nodejs_compat"]
+[observability]
+enabled = true
+
+[build]
+command = "npm run db:generate && npm run build"
+
+[[d1_databases]]
+binding = "DB" # i.e. available in your Worker on env.DB
+database_name = "prisma-demo-db"
+database_id = "711fe14b-5588-44c3-9c65-add0646426a5"
