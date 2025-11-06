@@ -1,0 +1,640 @@
+
+Object.defineProperty(exports, "__esModule", { value: true });
+
+const {
+  Decimal,
+  objectEnumValues,
+  makeStrictEnum,
+  Public,
+  getRuntime,
+  skip
+} = require('./runtime/index-browser.js')
+
+
+const Prisma = {}
+
+exports.Prisma = Prisma
+exports.$Enums = {}
+
+/**
+ * Prisma Client JS version: 5.22.0
+ * Query Engine version: 605197351a3c8bdd595af2d2a9bc3025bca48ea2
+ */
+Prisma.prismaVersion = {
+  client: "5.22.0",
+  engine: "605197351a3c8bdd595af2d2a9bc3025bca48ea2"
+}
+
+Prisma.PrismaClientKnownRequestError = () => {
+  const runtimeName = getRuntime().prettyName;
+  throw new Error(`PrismaClientKnownRequestError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
+In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
+)};
+Prisma.PrismaClientUnknownRequestError = () => {
+  const runtimeName = getRuntime().prettyName;
+  throw new Error(`PrismaClientUnknownRequestError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
+In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
+)}
+Prisma.PrismaClientRustPanicError = () => {
+  const runtimeName = getRuntime().prettyName;
+  throw new Error(`PrismaClientRustPanicError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
+In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
+)}
+Prisma.PrismaClientInitializationError = () => {
+  const runtimeName = getRuntime().prettyName;
+  throw new Error(`PrismaClientInitializationError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
+In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
+)}
+Prisma.PrismaClientValidationError = () => {
+  const runtimeName = getRuntime().prettyName;
+  throw new Error(`PrismaClientValidationError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
+In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
+)}
+Prisma.NotFoundError = () => {
+  const runtimeName = getRuntime().prettyName;
+  throw new Error(`NotFoundError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
+In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
+)}
+Prisma.Decimal = Decimal
+
+/**
+ * Re-export of sql-template-tag
+ */
+Prisma.sql = () => {
+  const runtimeName = getRuntime().prettyName;
+  throw new Error(`sqltag is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
+In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
+)}
+Prisma.empty = () => {
+  const runtimeName = getRuntime().prettyName;
+  throw new Error(`empty is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
+In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
+)}
+Prisma.join = () => {
+  const runtimeName = getRuntime().prettyName;
+  throw new Error(`join is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
+In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
+)}
+Prisma.raw = () => {
+  const runtimeName = getRuntime().prettyName;
+  throw new Error(`raw is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
+In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
+)}
+Prisma.validator = Public.validator
+
+/**
+* Extensions
+*/
+Prisma.getExtensionContext = () => {
+  const runtimeName = getRuntime().prettyName;
+  throw new Error(`Extensions.getExtensionContext is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
+In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
+)}
+Prisma.defineExtension = () => {
+  const runtimeName = getRuntime().prettyName;
+  throw new Error(`Extensions.defineExtension is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
+In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
+)}
+
+/**
+ * Shorthand utilities for JSON filtering
+ */
+Prisma.DbNull = objectEnumValues.instances.DbNull
+Prisma.JsonNull = objectEnumValues.instances.JsonNull
+Prisma.AnyNull = objectEnumValues.instances.AnyNull
+
+Prisma.NullTypes = {
+  DbNull: objectEnumValues.classes.DbNull,
+  JsonNull: objectEnumValues.classes.JsonNull,
+  AnyNull: objectEnumValues.classes.AnyNull
+}
+
+
+
+/**
+ * Enums
+ */
+
+exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
+  Serializable: 'Serializable'
+});
+
+exports.Prisma.UserScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  password: 'password',
+  isActive: 'isActive',
+  emailVerified: 'emailVerified',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  lastLoginAt: 'lastLoginAt',
+  departmentId: 'departmentId',
+  managerId: 'managerId'
+};
+
+exports.Prisma.UserProfileScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  fullName: 'fullName',
+  phone: 'phone',
+  address: 'address',
+  city: 'city',
+  state: 'state',
+  postalCode: 'postalCode',
+  country: 'country',
+  roleTitle: 'roleTitle'
+};
+
+exports.Prisma.RoleScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  desc: 'desc'
+};
+
+exports.Prisma.UserRoleScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  roleId: 'roleId'
+};
+
+exports.Prisma.DepartmentScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  desc: 'desc'
+};
+
+exports.Prisma.ConnectionScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  type: 'type',
+  businessCategory: 'businessCategory',
+  primaryContactId: 'primaryContactId',
+  gstNumber: 'gstNumber',
+  creditLimit: 'creditLimit',
+  paymentTermsDays: 'paymentTermsDays',
+  hasColdStorage: 'hasColdStorage',
+  deliveryPreferences: 'deliveryPreferences',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ContactPersonScalarFieldEnum = {
+  id: 'id',
+  connectionId: 'connectionId',
+  fullName: 'fullName',
+  email: 'email',
+  phone: 'phone',
+  isPrimary: 'isPrimary'
+};
+
+exports.Prisma.FSSAILicenseScalarFieldEnum = {
+  id: 'id',
+  connectionId: 'connectionId',
+  licenseNumber: 'licenseNumber',
+  issueDate: 'issueDate',
+  expiryDate: 'expiryDate'
+};
+
+exports.Prisma.ProductScalarFieldEnum = {
+  id: 'id',
+  sku: 'sku',
+  name: 'name',
+  category: 'category',
+  subCategory: 'subCategory',
+  description: 'description',
+  unit: 'unit',
+  packSize: 'packSize',
+  minFatPercent: 'minFatPercent',
+  minSnfPercent: 'minSnfPercent',
+  shelfLifeDays: 'shelfLifeDays',
+  storageTempMin: 'storageTempMin',
+  storageTempMax: 'storageTempMax',
+  requiresColdChain: 'requiresColdChain',
+  unitPrice: 'unitPrice',
+  costPrice: 'costPrice',
+  currentStock: 'currentStock',
+  reorderLevel: 'reorderLevel',
+  minOrderQuantity: 'minOrderQuantity'
+};
+
+exports.Prisma.ProductPriceHistoryScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  unitPrice: 'unitPrice',
+  costPrice: 'costPrice',
+  startDate: 'startDate',
+  endDate: 'endDate'
+};
+
+exports.Prisma.MilkCollectionCenterScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  latitude: 'latitude',
+  longitude: 'longitude',
+  dailyCapacityL: 'dailyCapacityL',
+  bmrAvailable: 'bmrAvailable',
+  hasTestingEquip: 'hasTestingEquip'
+};
+
+exports.Prisma.MilkProcurementEntryScalarFieldEnum = {
+  id: 'id',
+  supplierId: 'supplierId',
+  collectionCenterId: 'collectionCenterId',
+  datetime: 'datetime',
+  quantityL: 'quantityL',
+  fatPercent: 'fatPercent',
+  snfPercent: 'snfPercent',
+  clrReading: 'clrReading',
+  temperatureC: 'temperatureC',
+  qualityGrade: 'qualityGrade',
+  ratePerLitre: 'ratePerLitre',
+  totalAmount: 'totalAmount',
+  paymentStatus: 'paymentStatus',
+  milkType: 'milkType',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.MilkRateChartScalarFieldEnum = {
+  id: 'id',
+  fatPercentMin: 'fatPercentMin',
+  fatPercentMax: 'fatPercentMax',
+  snfPercentMin: 'snfPercentMin',
+  snfPercentMax: 'snfPercentMax',
+  milkType: 'milkType',
+  qualityGrade: 'qualityGrade',
+  ratePerLitre: 'ratePerLitre',
+  effectiveFrom: 'effectiveFrom',
+  effectiveTo: 'effectiveTo'
+};
+
+exports.Prisma.ProductionBatchScalarFieldEnum = {
+  id: 'id',
+  batchNumber: 'batchNumber',
+  productId: 'productId',
+  producedQty: 'producedQty',
+  productionDate: 'productionDate',
+  manufacturingDate: 'manufacturingDate',
+  expiryDate: 'expiryDate',
+  status: 'status'
+};
+
+exports.Prisma.ProductionBatchItemScalarFieldEnum = {
+  id: 'id',
+  batchId: 'batchId',
+  productId: 'productId',
+  rawMilkUsedL: 'rawMilkUsedL',
+  quantity: 'quantity'
+};
+
+exports.Prisma.QualityTestScalarFieldEnum = {
+  id: 'id',
+  testDate: 'testDate',
+  testedById: 'testedById',
+  targetType: 'targetType',
+  targetId: 'targetId',
+  parameters: 'parameters',
+  outcome: 'outcome',
+  remarks: 'remarks'
+};
+
+exports.Prisma.SalesInquiryScalarFieldEnum = {
+  id: 'id',
+  inquiryNumber: 'inquiryNumber',
+  connectionId: 'connectionId',
+  productId: 'productId',
+  quantity: 'quantity',
+  quotedPrice: 'quotedPrice',
+  status: 'status',
+  source: 'source',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.QuotationScalarFieldEnum = {
+  id: 'id',
+  quoteRef: 'quoteRef',
+  connectionId: 'connectionId',
+  subtotal: 'subtotal',
+  gstCGST: 'gstCGST',
+  gstSGST: 'gstSGST',
+  gstIGST: 'gstIGST',
+  discount: 'discount',
+  transportCharges: 'transportCharges',
+  coldChainCharges: 'coldChainCharges',
+  deliveryTerms: 'deliveryTerms',
+  paymentTerms: 'paymentTerms',
+  status: 'status',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.QuoteLineItemScalarFieldEnum = {
+  id: 'id',
+  quotationId: 'quotationId',
+  productId: 'productId',
+  qty: 'qty',
+  unitPrice: 'unitPrice',
+  totalPrice: 'totalPrice'
+};
+
+exports.Prisma.SalesOrderScalarFieldEnum = {
+  id: 'id',
+  orderRef: 'orderRef',
+  connectionId: 'connectionId',
+  stage: 'stage',
+  deliveryAddress: 'deliveryAddress',
+  distanceKm: 'distanceKm',
+  vehicleReq: 'vehicleReq',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.OrderItemScalarFieldEnum = {
+  id: 'id',
+  salesOrderId: 'salesOrderId',
+  productId: 'productId',
+  qty: 'qty',
+  price: 'price',
+  batchId: 'batchId',
+  mfgDate: 'mfgDate',
+  expiryDate: 'expiryDate'
+};
+
+exports.Prisma.InvoiceScalarFieldEnum = {
+  id: 'id',
+  invoiceNumber: 'invoiceNumber',
+  salesOrderId: 'salesOrderId',
+  dueDate: 'dueDate',
+  totalAmount: 'totalAmount',
+  paidAmount: 'paidAmount',
+  status: 'status',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.PaymentScalarFieldEnum = {
+  id: 'id',
+  invoiceId: 'invoiceId',
+  amount: 'amount',
+  method: 'method',
+  referenceNo: 'referenceNo',
+  bankName: 'bankName',
+  paidAt: 'paidAt',
+  status: 'status'
+};
+
+exports.Prisma.DeliveryChallanScalarFieldEnum = {
+  id: 'id',
+  challanNumber: 'challanNumber',
+  salesOrderId: 'salesOrderId',
+  vehicleNumber: 'vehicleNumber',
+  driverName: 'driverName',
+  driverPhone: 'driverPhone',
+  tempInitialC: 'tempInitialC',
+  tempFinalC: 'tempFinalC',
+  signedBy: 'signedBy',
+  deliveredAt: 'deliveredAt'
+};
+
+exports.Prisma.StorageLocationScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  type: 'type',
+  capacity: 'capacity',
+  currentLoad: 'currentLoad',
+  tempMin: 'tempMin',
+  tempMax: 'tempMax',
+  currentTemp: 'currentTemp',
+  operational: 'operational',
+  maintenanceLog: 'maintenanceLog'
+};
+
+exports.Prisma.InventoryStockScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  batchId: 'batchId',
+  storageLocationId: 'storageLocationId',
+  quantity: 'quantity',
+  mfgDate: 'mfgDate',
+  expiryDate: 'expiryDate',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.InventoryTransactionScalarFieldEnum = {
+  id: 'id',
+  stockId: 'stockId',
+  type: 'type',
+  qty: 'qty',
+  referenceType: 'referenceType',
+  referenceId: 'referenceId',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.PurchaseOrderScalarFieldEnum = {
+  id: 'id',
+  poRef: 'poRef',
+  type: 'type',
+  supplierId: 'supplierId',
+  expectedDate: 'expectedDate',
+  actualDate: 'actualDate',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.POItemScalarFieldEnum = {
+  id: 'id',
+  purchaseOrderId: 'purchaseOrderId',
+  description: 'description',
+  qty: 'qty',
+  unitPrice: 'unitPrice'
+};
+
+exports.Prisma.BillScalarFieldEnum = {
+  id: 'id',
+  billNumber: 'billNumber',
+  supplierId: 'supplierId',
+  dueDate: 'dueDate',
+  amount: 'amount',
+  paidAmount: 'paidAmount',
+  status: 'status'
+};
+
+exports.Prisma.SupportTicketScalarFieldEnum = {
+  id: 'id',
+  ticketNumber: 'ticketNumber',
+  connectionId: 'connectionId',
+  issueType: 'issueType',
+  priority: 'priority',
+  status: 'status',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.TicketCommentScalarFieldEnum = {
+  id: 'id',
+  ticketId: 'ticketId',
+  authorId: 'authorId',
+  content: 'content',
+  isInternal: 'isInternal',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.SupplierFeedbackScalarFieldEnum = {
+  id: 'id',
+  supplierId: 'supplierId',
+  feedbackType: 'feedbackType',
+  details: 'details',
+  resolved: 'resolved'
+};
+
+exports.Prisma.ActivityScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  type: 'type',
+  notes: 'notes',
+  relatedType: 'relatedType',
+  relatedId: 'relatedId',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.DocumentScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  path: 'path',
+  category: 'category',
+  relatedType: 'relatedType',
+  relatedId: 'relatedId',
+  uploadedById: 'uploadedById',
+  uploadedAt: 'uploadedAt'
+};
+
+exports.Prisma.NotificationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  title: 'title',
+  body: 'body',
+  isRead: 'isRead',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.SalesTargetScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  period: 'period',
+  amount: 'amount',
+  achieved: 'achieved'
+};
+
+exports.Prisma.CommissionRuleScalarFieldEnum = {
+  id: 'id',
+  productCategory: 'productCategory',
+  minAmount: 'minAmount',
+  maxAmount: 'maxAmount',
+  percentage: 'percentage'
+};
+
+exports.Prisma.CommissionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  orderId: 'orderId',
+  amount: 'amount',
+  paidStatus: 'paidStatus'
+};
+
+exports.Prisma.AuditLogScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  action: 'action',
+  entity: 'entity',
+  entityId: 'entityId',
+  meta: 'meta',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.VerificationTokenScalarFieldEnum = {
+  id: 'id',
+  token: 'token',
+  userId: 'userId',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.SortOrder = {
+  asc: 'asc',
+  desc: 'desc'
+};
+
+exports.Prisma.NullsOrder = {
+  first: 'first',
+  last: 'last'
+};
+
+
+exports.Prisma.ModelName = {
+  User: 'User',
+  UserProfile: 'UserProfile',
+  Role: 'Role',
+  UserRole: 'UserRole',
+  Department: 'Department',
+  Connection: 'Connection',
+  ContactPerson: 'ContactPerson',
+  FSSAILicense: 'FSSAILicense',
+  Product: 'Product',
+  ProductPriceHistory: 'ProductPriceHistory',
+  MilkCollectionCenter: 'MilkCollectionCenter',
+  MilkProcurementEntry: 'MilkProcurementEntry',
+  MilkRateChart: 'MilkRateChart',
+  ProductionBatch: 'ProductionBatch',
+  ProductionBatchItem: 'ProductionBatchItem',
+  QualityTest: 'QualityTest',
+  SalesInquiry: 'SalesInquiry',
+  Quotation: 'Quotation',
+  QuoteLineItem: 'QuoteLineItem',
+  SalesOrder: 'SalesOrder',
+  OrderItem: 'OrderItem',
+  Invoice: 'Invoice',
+  Payment: 'Payment',
+  DeliveryChallan: 'DeliveryChallan',
+  StorageLocation: 'StorageLocation',
+  InventoryStock: 'InventoryStock',
+  InventoryTransaction: 'InventoryTransaction',
+  PurchaseOrder: 'PurchaseOrder',
+  POItem: 'POItem',
+  Bill: 'Bill',
+  SupportTicket: 'SupportTicket',
+  TicketComment: 'TicketComment',
+  SupplierFeedback: 'SupplierFeedback',
+  Activity: 'Activity',
+  Document: 'Document',
+  Notification: 'Notification',
+  SalesTarget: 'SalesTarget',
+  CommissionRule: 'CommissionRule',
+  Commission: 'Commission',
+  AuditLog: 'AuditLog',
+  VerificationToken: 'VerificationToken'
+};
+
+/**
+ * This is a stub Prisma Client that will error at runtime if called.
+ */
+class PrismaClient {
+  constructor() {
+    return new Proxy(this, {
+      get(target, prop) {
+        let message
+        const runtime = getRuntime()
+        if (runtime.isEdge) {
+          message = `PrismaClient is not configured to run in ${runtime.prettyName}. In order to run Prisma Client on edge runtime, either:
+- Use Prisma Accelerate: https://pris.ly/d/accelerate
+- Use Driver Adapters: https://pris.ly/d/driver-adapters
+`;
+        } else {
+          message = 'PrismaClient is unable to run in this browser environment, or has been bundled for the browser (running in `' + runtime.prettyName + '`).'
+        }
+        
+        message += `
+If this is unexpected, please open an issue: https://pris.ly/prisma-prisma-bug-report`
+
+        throw new Error(message)
+      }
+    })
+  }
+}
+
+exports.PrismaClient = PrismaClient
+
+Object.assign(exports, Prisma)

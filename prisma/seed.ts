@@ -73,17 +73,21 @@ async function main() {
   }
 
   console.log('Seeding sample connection types and a sample supplier...')
-  const conn = await prisma.connection.upsert({
-    where: { name: 'Sample Dairy Supplier' },
-    update: {},
-    create: {
-      name: 'Sample Dairy Supplier',
-      type: 'MILK_SUPPLIER',
-      businessCategory: 'B2B',
-      gstNumber: 'GSTIN0000',
-      creditLimit: 50000
-    }
+  let conn = await prisma.connection.findFirst({
+    where: { name: 'Sample Dairy Supplier' }
   })
+  
+  if (!conn) {
+    conn = await prisma.connection.create({
+      data: {
+        name: 'Sample Dairy Supplier',
+        type: 'MILK_SUPPLIER',
+        businessCategory: 'B2B',
+        gstNumber: 'GSTIN0000',
+        creditLimit: 50000
+      }
+    })
+  }
 
   await prisma.contactPerson.upsert({
     where: { id: `${conn.id}-primary` },

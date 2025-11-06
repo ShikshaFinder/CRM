@@ -19,6 +19,17 @@ export const authOptions: any = {
         if (!credentials?.email || !credentials?.password) return null
         const user = await prisma.user.findUnique({ where: { email: credentials.email } })
         if (!user) return null
+        
+        // Check if user is active
+        if (!user.isActive) {
+          throw new Error('Your account is not active. Please verify your email first.')
+        }
+        
+        // Check if email is verified
+        if (!user.emailVerified) {
+          throw new Error('Please verify your email address before signing in.')
+        }
+        
         // Passwords in seed are plaintext 'changeme' - in production store hashed passwords
         const isHashed = user.password && user.password.startsWith('$2')
         const valid = isHashed

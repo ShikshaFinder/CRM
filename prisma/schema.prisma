@@ -1,117 +1,16 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db" // ignored for D1 but required for Prisma CLI
 }
-
-// Enums
-enum BusinessCategory {
-  B2B
-  B2C
-  BOTH
-}
-
-enum ConnectionType {
-  DAIRY_FARMER
-  MILK_SUPPLIER
-  RETAILER
-  DISTRIBUTOR
-  WHOLESALER
-  HOTEL_RESTAURANT
-  INSTITUTIONAL
-  ONLINE_RETAILER
-}
-
-enum ProductCategory {
-  MILK
-  PANEER
-  GHEE
-  BUTTER
-  CURD
-  BUTTERMILK
-  LASSI
-  ICE_CREAM
-  CHEESE
-  FLAVORED_MILK
-}
-
-enum SubCategory {
-  FULL_CREAM
-  TONED
-  DOUBLE_TONED
-  SKIMMED
-  ORGANIC
-  FLAVORED
-}
-
-enum Unit {
-  LITRE
-  KG
-  GRAM
-  PIECE
-  PACK
-}
-
-enum QualityGrade {
-  A
-  B
-  C
-  REJECTED
-}
-
-enum MilkType {
-  COW
-  BUFFALO
-  MIXED
-}
-
-enum ProcurementPaymentStatus {
-  PENDING
-  PARTIAL
-  PAID
-}
-
-enum ProductionStatus {
-  IN_PRODUCTION
-  COMPLETED
-  QUALITY_CHECK
-  APPROVED
-  REJECTED
-  DISPATCHED
-}
-
-enum TestOutcome {
-  PASS
-  FAIL
-  CONDITIONAL
-}
-
-enum InventoryTransactionType {
-  PRODUCTION_IN
-  SALES_OUT
-  PURCHASE_IN
-  DAMAGE
-  EXPIRY
-  RETURN
-  ADJUSTMENT
-}
-
-enum TicketPriority {
-  LOW
-  MEDIUM
-  HIGH
-  CRITICAL
-}
-
-enum TicketStatus {
-  OPEN
-  IN_PROGRESS
-  RESOLVED
-  CLOSED
-}
+// NOTE: Cloudflare D1 (SQLite) does not support native enums or Json columns in Prisma.
+// To keep compatibility with D1, enum-like fields are modelled as String and
+// Json fields are stored as text (String). Enforce allowed values in application code.
 
 // Core user and org models
 model User {
@@ -119,6 +18,7 @@ model User {
   email          String      @unique
   password       String
   isActive       Boolean     @default(true)
+  emailVerified  Boolean     @default(false)
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
   lastLoginAt    DateTime?
@@ -137,6 +37,7 @@ model User {
   documentsUploaded Document[]
   salesTargets   SalesTarget[]
   commissions    Commission[]
+  verificationTokens VerificationToken[]
 }
 
 model UserProfile {
@@ -179,8 +80,8 @@ model Department {
 model Connection {
   id                 String           @id @default(uuid())
   name               String
-  type               ConnectionType
-  businessCategory   BusinessCategory
+  type               String
+  businessCategory   String
   primaryContactId   String?
   contacts           ContactPerson[]
   fssaiLicenses      FSSAILicense[]
@@ -225,10 +126,10 @@ model Product {
   id                 String               @id @default(uuid())
   sku                String?              @unique
   name               String
-  category           ProductCategory
-  subCategory        SubCategory?
+  category           String
+  subCategory        String?
   description        String?
-  unit               Unit
+  unit               String
   packSize           String? // human readable: "200 ml", "1 L"
   minFatPercent      Float?  // quality parameter
   minSnfPercent      Float?
@@ -284,11 +185,11 @@ model MilkProcurementEntry {
   snfPercent        Float?
   clrReading        Float?
   temperatureC      Float?
-  qualityGrade      QualityGrade
+  qualityGrade      String
   ratePerLitre      Float
   totalAmount       Float
-  paymentStatus     ProcurementPaymentStatus  @default(PENDING)
-  milkType          MilkType?                 
+  paymentStatus     String                      @default("PENDING")
+  milkType          String?
   createdAt         DateTime                   @default(now())
 }
 
@@ -298,8 +199,8 @@ model MilkRateChart {
   fatPercentMax Float
   snfPercentMin Float
   snfPercentMax Float
-  milkType     MilkType
-  qualityGrade QualityGrade
+  milkType     String
+  qualityGrade String
   ratePerLitre Float
   effectiveFrom DateTime @default(now())
   effectiveTo   DateTime?
@@ -315,7 +216,7 @@ model ProductionBatch {
   productionDate   DateTime               @default(now())
   manufacturingDate DateTime?
   expiryDate       DateTime?
-  status           ProductionStatus       @default(IN_PRODUCTION)
+  status           String                 @default("IN_PRODUCTION")
   items            ProductionBatchItem[]
   orderItems       OrderItem[]
   inventoryStocks  InventoryStock[]
@@ -339,8 +240,8 @@ model QualityTest {
   testedBy       User?      @relation(fields: [testedById], references: [id])
   targetType     String     // e.g., "RawMilk", "Batch", "InProcess"
   targetId       String?    // reference id
-  parameters     Json?
-  outcome        TestOutcome
+  parameters     String?    // JSON stored as text for D1 compatibility
+  outcome        String
   remarks        String?
 }
 
@@ -466,7 +367,7 @@ model StorageLocation {
   tempMax        Float?
   currentTemp    Float?
   operational    Boolean? @default(true)
-  maintenanceLog Json?
+  maintenanceLog String?  // JSON stored as text for D1
   stocks         InventoryStock[]
 }
 
@@ -489,7 +390,7 @@ model InventoryTransaction {
   id               String                  @id @default(uuid())
   stockId          String
   stock            InventoryStock @relation(fields: [stockId], references: [id])
-  type             InventoryTransactionType
+  type             String
   qty              Float
   referenceType    String? // e.g., "SalesOrder", "ProductionBatch"
   referenceId      String?
@@ -536,8 +437,8 @@ model SupportTicket {
   connectionId String?
   connection   Connection? @relation(fields: [connectionId], references: [id])
   issueType    String
-  priority     TicketPriority
-  status       TicketStatus
+  priority     String
+  status       String
   createdAt    DateTime    @default(now())
   comments     TicketComment[]
 }
@@ -607,7 +508,7 @@ model SalesTarget {
 
 model CommissionRule {
   id           String @id @default(uuid())
-  productCategory ProductCategory?
+  productCategory String?
   minAmount    Float?
   maxAmount    Float?
   percentage   Float
@@ -630,6 +531,16 @@ model AuditLog {
   action    String
   entity    String
   entityId  String?
-  meta      Json?
+  meta      String?  // JSON stored as text for D1
   createdAt DateTime @default(now())
+}
+
+// Email Verification
+model VerificationToken {
+  id         String   @id @default(uuid())
+  token      String   @unique
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
 }

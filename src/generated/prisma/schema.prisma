@@ -1,0 +1,547 @@
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db" // ignored for D1 but required for Prisma CLI
+}
+
+// NOTE: Cloudflare D1 (SQLite) does not support native enums or Json columns in Prisma.
+// To keep compatibility with D1, enum-like fields are modelled as String and
+// Json fields are stored as text (String). Enforce allowed values in application code.
+
+// Core user and org models
+model User {
+  id                 String              @id @default(uuid())
+  email              String              @unique
+  password           String
+  isActive           Boolean             @default(true)
+  emailVerified      Boolean             @default(false)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  lastLoginAt        DateTime?
+  profile            UserProfile?
+  roles              UserRole[]
+  departmentId       String?
+  department         Department?         @relation(fields: [departmentId], references: [id])
+  managerId          String?
+  manager            User?               @relation("UserManager", fields: [managerId], references: [id])
+  reports            User[]              @relation("UserManager")
+  activities         Activity[]
+  notifications      Notification[]
+  auditLogs          AuditLog[]
+  qualityTests       QualityTest[]
+  ticketComments     TicketComment[]
+  documentsUploaded  Document[]
+  salesTargets       SalesTarget[]
+  commissions        Commission[]
+  verificationTokens VerificationToken[]
+}
+
+model UserProfile {
+  id         String  @id @default(uuid())
+  userId     String  @unique
+  user       User    @relation(fields: [userId], references: [id])
+  fullName   String?
+  phone      String?
+  address    String?
+  city       String?
+  state      String?
+  postalCode String?
+  country    String?
+  roleTitle  String? // e.g., Sales Executive
+}
+
+model Role {
+  id    String     @id @default(uuid())
+  name  String     @unique
+  desc  String?
+  users UserRole[]
+}
+
+model UserRole {
+  id     String @id @default(uuid())
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+  role   Role   @relation(fields: [roleId], references: [id])
+  roleId String
+}
+
+model Department {
+  id    String  @id @default(uuid())
+  name  String  @unique
+  desc  String?
+  users User[]
+}
+
+// Connections and contacts
+model Connection {
+  id                  String                 @id @default(uuid())
+  name                String
+  type                String
+  businessCategory    String
+  primaryContactId    String?
+  contacts            ContactPerson[]
+  fssaiLicenses       FSSAILicense[]
+  gstNumber           String?
+  creditLimit         Float?                 @default(0)
+  paymentTermsDays    Int?                   @default(0)
+  hasColdStorage      Boolean?               @default(false)
+  deliveryPreferences String?
+  procurements        MilkProcurementEntry[]
+  salesInquiries      SalesInquiry[]
+  quotations          Quotation[]
+  salesOrders         SalesOrder[]
+  purchaseOrders      PurchaseOrder[]
+  bills               Bill[]
+  supportTickets      SupportTicket[]
+  supplierFeedbacks   SupplierFeedback[]
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+}
+
+model ContactPerson {
+  id           String     @id @default(uuid())
+  connection   Connection @relation(fields: [connectionId], references: [id])
+  connectionId String
+  fullName     String
+  email        String?
+  phone        String?
+  isPrimary    Boolean    @default(false)
+}
+
+model FSSAILicense {
+  id            String     @id @default(uuid())
+  connection    Connection @relation(fields: [connectionId], references: [id])
+  connectionId  String
+  licenseNumber String
+  issueDate     DateTime?
+  expiryDate    DateTime?
+}
+
+// Products & catalog
+model Product {
+  id                         String                @id @default(uuid())
+  sku                        String?               @unique
+  name                       String
+  category                   String
+  subCategory                String?
+  description                String?
+  unit                       String
+  packSize                   String? // human readable: "200 ml", "1 L"
+  minFatPercent              Float? // quality parameter
+  minSnfPercent              Float?
+  shelfLifeDays              Int?
+  storageTempMin             Float?
+  storageTempMax             Float?
+  requiresColdChain          Boolean               @default(false)
+  unitPrice                  Float?
+  costPrice                  Float?
+  currentStock               Float?                @default(0)
+  reorderLevel               Float?                @default(0)
+  minOrderQuantity           Float?                @default(0)
+  priceHistory               ProductPriceHistory[]
+  inventoryStocks            InventoryStock[]
+  orderItems                 OrderItem[]
+  productionBatches          ProductionBatchItem[]
+  productionBatchesByProduct ProductionBatch[]
+  quoteLineItems             QuoteLineItem[]
+  salesInquiries             SalesInquiry[]
+}
+
+model ProductPriceHistory {
+  id        String    @id @default(uuid())
+  product   Product   @relation(fields: [productId], references: [id])
+  productId String
+  unitPrice Float
+  costPrice Float?
+  startDate DateTime  @default(now())
+  endDate   DateTime?
+}
+
+// Milk procurement
+model MilkCollectionCenter {
+  id              String                 @id @default(uuid())
+  name            String
+  latitude        Float?
+  longitude       Float?
+  dailyCapacityL  Float?                 @default(0)
+  bmrAvailable    Boolean?               @default(false)
+  hasTestingEquip Boolean?               @default(false)
+  procurements    MilkProcurementEntry[]
+}
+
+model MilkProcurementEntry {
+  id                 String                @id @default(uuid())
+  supplierId         String
+  supplier           Connection            @relation(fields: [supplierId], references: [id])
+  collectionCenterId String?
+  collectionCenter   MilkCollectionCenter? @relation(fields: [collectionCenterId], references: [id])
+  datetime           DateTime              @default(now())
+  quantityL          Float
+  fatPercent         Float?
+  snfPercent         Float?
+  clrReading         Float?
+  temperatureC       Float?
+  qualityGrade       String
+  ratePerLitre       Float
+  totalAmount        Float
+  paymentStatus      String                @default("PENDING")
+  milkType           String?
+  createdAt          DateTime              @default(now())
+}
+
+model MilkRateChart {
+  id            String    @id @default(uuid())
+  fatPercentMin Float
+  fatPercentMax Float
+  snfPercentMin Float
+  snfPercentMax Float
+  milkType      String
+  qualityGrade  String
+  ratePerLitre  Float
+  effectiveFrom DateTime  @default(now())
+  effectiveTo   DateTime?
+}
+
+// Production
+model ProductionBatch {
+  id                String                @id @default(uuid())
+  batchNumber       String                @unique
+  productId         String
+  product           Product               @relation(fields: [productId], references: [id])
+  producedQty       Float
+  productionDate    DateTime              @default(now())
+  manufacturingDate DateTime?
+  expiryDate        DateTime?
+  status            String                @default("IN_PRODUCTION")
+  items             ProductionBatchItem[]
+  orderItems        OrderItem[]
+  inventoryStocks   InventoryStock[]
+}
+
+model ProductionBatchItem {
+  id           String          @id @default(uuid())
+  batchId      String
+  batch        ProductionBatch @relation(fields: [batchId], references: [id])
+  productId    String
+  product      Product         @relation(fields: [productId], references: [id])
+  rawMilkUsedL Float?
+  quantity     Float
+}
+
+// Quality control
+model QualityTest {
+  id         String   @id @default(uuid())
+  testDate   DateTime @default(now())
+  testedById String?
+  testedBy   User?    @relation(fields: [testedById], references: [id])
+  targetType String // e.g., "RawMilk", "Batch", "InProcess"
+  targetId   String? // reference id
+  parameters String? // JSON stored as text for D1 compatibility
+  outcome    String
+  remarks    String?
+}
+
+// Sales pipeline
+model SalesInquiry {
+  id            String     @id @default(uuid())
+  inquiryNumber String     @unique
+  connectionId  String
+  connection    Connection @relation(fields: [connectionId], references: [id])
+  productId     String?
+  product       Product?   @relation(fields: [productId], references: [id])
+  quantity      Float?
+  quotedPrice   Float?
+  status        String?
+  source        String?
+  createdAt     DateTime   @default(now())
+}
+
+model Quotation {
+  id               String          @id @default(uuid())
+  quoteRef         String          @unique
+  connectionId     String
+  connection       Connection      @relation(fields: [connectionId], references: [id])
+  subtotal         Float
+  gstCGST          Float?
+  gstSGST          Float?
+  gstIGST          Float?
+  discount         Float?
+  transportCharges Float?
+  coldChainCharges Float?
+  deliveryTerms    String?
+  paymentTerms     String?
+  status           String?
+  createdAt        DateTime        @default(now())
+  lineItems        QuoteLineItem[]
+}
+
+model QuoteLineItem {
+  id          String    @id @default(uuid())
+  quotation   Quotation @relation(fields: [quotationId], references: [id])
+  quotationId String
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id])
+  qty         Float
+  unitPrice   Float
+  totalPrice  Float
+}
+
+model SalesOrder {
+  id              String      @id @default(uuid())
+  orderRef        String      @unique
+  connectionId    String
+  connection      Connection  @relation(fields: [connectionId], references: [id])
+  stage           String?
+  deliveryAddress String?
+  distanceKm      Float?
+  vehicleReq      String?
+  createdAt       DateTime    @default(now())
+  items           OrderItem[]
+  invoices        Invoice[]
+}
+
+model OrderItem {
+  id           String           @id @default(uuid())
+  salesOrder   SalesOrder       @relation(fields: [salesOrderId], references: [id])
+  salesOrderId String
+  productId    String
+  product      Product          @relation(fields: [productId], references: [id])
+  qty          Float
+  price        Float
+  batchId      String?
+  batch        ProductionBatch? @relation(fields: [batchId], references: [id])
+  mfgDate      DateTime?
+  expiryDate   DateTime?
+}
+
+model Invoice {
+  id            String      @id @default(uuid())
+  invoiceNumber String      @unique
+  salesOrderId  String?
+  salesOrder    SalesOrder? @relation(fields: [salesOrderId], references: [id])
+  dueDate       DateTime?
+  totalAmount   Float
+  paidAmount    Float       @default(0)
+  status        String?
+  createdAt     DateTime    @default(now())
+  payments      Payment[]
+}
+
+model Payment {
+  id          String   @id @default(uuid())
+  invoiceId   String?
+  invoice     Invoice? @relation(fields: [invoiceId], references: [id])
+  amount      Float
+  method      String
+  referenceNo String?
+  bankName    String?
+  paidAt      DateTime @default(now())
+  status      String?
+}
+
+model DeliveryChallan {
+  id            String    @id @default(uuid())
+  challanNumber String    @unique
+  salesOrderId  String?
+  vehicleNumber String?
+  driverName    String?
+  driverPhone   String?
+  tempInitialC  Float?
+  tempFinalC    Float?
+  signedBy      String?
+  deliveredAt   DateTime?
+}
+
+// Inventory & cold chain
+model StorageLocation {
+  id             String           @id @default(uuid())
+  name           String
+  type           String // Cold Room / Freezer / Refrigerated Warehouse
+  capacity       Float?
+  currentLoad    Float?           @default(0)
+  tempMin        Float?
+  tempMax        Float?
+  currentTemp    Float?
+  operational    Boolean?         @default(true)
+  maintenanceLog String? // JSON stored as text for D1
+  stocks         InventoryStock[]
+}
+
+model InventoryStock {
+  id                String                 @id @default(uuid())
+  productId         String
+  product           Product                @relation(fields: [productId], references: [id])
+  batchId           String?
+  batch             ProductionBatch?       @relation(fields: [batchId], references: [id])
+  storageLocationId String
+  storageLocation   StorageLocation        @relation(fields: [storageLocationId], references: [id])
+  quantity          Float
+  mfgDate           DateTime?
+  expiryDate        DateTime?
+  createdAt         DateTime               @default(now())
+  txns              InventoryTransaction[]
+}
+
+model InventoryTransaction {
+  id            String         @id @default(uuid())
+  stockId       String
+  stock         InventoryStock @relation(fields: [stockId], references: [id])
+  type          String
+  qty           Float
+  referenceType String? // e.g., "SalesOrder", "ProductionBatch"
+  referenceId   String?
+  createdAt     DateTime       @default(now())
+}
+
+// Purchasing
+model PurchaseOrder {
+  id           String     @id @default(uuid())
+  poRef        String     @unique
+  type         String
+  supplierId   String
+  supplier     Connection @relation(fields: [supplierId], references: [id])
+  expectedDate DateTime?
+  actualDate   DateTime?
+  createdAt    DateTime   @default(now())
+  items        POItem[]
+}
+
+model POItem {
+  id              String        @id @default(uuid())
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+  purchaseOrderId String
+  description     String
+  qty             Float
+  unitPrice       Float
+}
+
+model Bill {
+  id         String     @id @default(uuid())
+  billNumber String     @unique
+  supplierId String
+  supplier   Connection @relation(fields: [supplierId], references: [id])
+  dueDate    DateTime?
+  amount     Float
+  paidAmount Float      @default(0)
+  status     String?
+}
+
+// Support & communication
+model SupportTicket {
+  id           String          @id @default(uuid())
+  ticketNumber String          @unique
+  connectionId String?
+  connection   Connection?     @relation(fields: [connectionId], references: [id])
+  issueType    String
+  priority     String
+  status       String
+  createdAt    DateTime        @default(now())
+  comments     TicketComment[]
+}
+
+model TicketComment {
+  id         String        @id @default(uuid())
+  ticketId   String
+  ticket     SupportTicket @relation(fields: [ticketId], references: [id])
+  authorId   String?
+  author     User?         @relation(fields: [authorId], references: [id])
+  content    String
+  isInternal Boolean       @default(false)
+  createdAt  DateTime      @default(now())
+}
+
+model SupplierFeedback {
+  id           String     @id @default(uuid())
+  supplierId   String
+  supplier     Connection @relation(fields: [supplierId], references: [id])
+  feedbackType String
+  details      String?
+  resolved     Boolean    @default(false)
+}
+
+model Activity {
+  id          String   @id @default(uuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  type        String
+  notes       String?
+  relatedType String?
+  relatedId   String?
+  createdAt   DateTime @default(now())
+}
+
+model Document {
+  id           String   @id @default(uuid())
+  name         String
+  path         String
+  category     String?
+  relatedType  String?
+  relatedId    String?
+  uploadedById String?
+  uploadedBy   User?    @relation(fields: [uploadedById], references: [id])
+  uploadedAt   DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  title     String
+  body      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+// Analytics & commission
+model SalesTarget {
+  id       String  @id @default(uuid())
+  userId   String?
+  user     User?   @relation(fields: [userId], references: [id])
+  period   String // e.g., 2025-11 (monthly), 2025-Q4
+  amount   Float
+  achieved Float   @default(0)
+}
+
+model CommissionRule {
+  id              String  @id @default(uuid())
+  productCategory String?
+  minAmount       Float?
+  maxAmount       Float?
+  percentage      Float
+}
+
+model Commission {
+  id         String  @id @default(uuid())
+  userId     String?
+  user       User?   @relation(fields: [userId], references: [id])
+  orderId    String?
+  amount     Float
+  paidStatus String?
+}
+
+// Audit
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String
+  entity    String
+  entityId  String?
+  meta      String? // JSON stored as text for D1
+  createdAt DateTime @default(now())
+}
+
+// Email Verification
+model VerificationToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}

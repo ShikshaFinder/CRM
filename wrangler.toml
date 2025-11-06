@@ -1,0 +1,9 @@
+name = "nextjs-d1"
+main = "src/app/api/users/route.ts"
+compatibility_date = "2024-03-20"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "prisma-demo-db"
+database_id = "bdc3405b-6cf3-450b-9030-11c263c02cde"
+
