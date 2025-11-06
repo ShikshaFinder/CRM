@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server';
-import bcrypt from 'bcrypt';
-import prisma from '../../../../lib/prisma';
-import { sendVerificationEmail } from '../../../../lib/email';
-import { randomBytes } from 'crypto';
+import { NextResponse } from "next/server";
+import bcrypt from "bcrypt";
+import prisma from "@/lib/prisma";
+import { sendVerificationEmail } from "../../../../lib/email";
+import { randomBytes } from "crypto";
 
 export async function POST(req: Request) {
   try {
@@ -11,38 +11,45 @@ export async function POST(req: Request) {
 
     if (!email || !password) {
       return NextResponse.json(
-        { error: 'Email and password are required' },
+        { error: "Email and password are required" },
         { status: 400 }
       );
     }
 
-    // Check if user already exists
+    // 🔹 Normalize email
+    const normalizedEmail = email.toLowerCase();
+
+    // 🔹 Check if user already exists
     const existingUser = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() },
+      where: { email: normalizedEmail },
     });
 
     if (existingUser) {
       return NextResponse.json(
-        { error: 'User with this email already exists' },
+        { error: "User with this email already exists" },
         { status: 400 }
       );
     }
 
-    // Hash password
+    // 🔹 Hash password securely
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Generate verification token
-    const token = randomBytes(32).toString('hex');
+    // 🔹 Generate email verification token
+    const token = randomBytes(32).toString("hex");
     const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + 24); // 24 hours expiry
+    expiresAt.setHours(expiresAt.getHours() + 24); // expires in 24 hours
 
-    // Create user (inactive until email is verified)
+    const currentTime = Math.floor(Date.now() / 1000); // Unix seconds
+
+    // 🔹 Create user (inactive until verified)
     const user = await prisma.user.create({
       data: {
-        email: email.toLowerCase(),
+        email: normalizedEmail,
         password: hashedPassword,
-        isActive: false,
-        emailVerified: false,
+        isActive: 0, // Int (0 = inactive)
+        emailVerified: 0, // Int (0 = not verified)
+        createdAt: currentTime,
+        updatedAt: currentTime,
         profile: {
           create: {
             fullName: fullName || undefined,
@@ -52,7 +59,7 @@ export async function POST(req: Request) {
         verificationTokens: {
           create: {
             token,
-            expiresAt,
+            expiresAt, // DateTime type, valid for SQLite/D1
           },
         },
       },
@@ -61,32 +68,30 @@ export async function POST(req: Request) {
       },
     });
 
-    // Send verification email
+    // 🔹 Send verification email
     const emailResult = await sendVerificationEmail(user.email, token);
 
     if (!emailResult.success) {
-      // If email fails, we still create the user but log the error
-      console.error('Failed to send verification email:', emailResult.error);
-      // Optionally, you might want to delete the user here if email is critical
+      console.error("Failed to send verification email:", emailResult.error);
+      // Optionally rollback or alert admin
     }
 
-    // Don't return the password or token in response
+    // 🔹 Remove sensitive fields before returning
     const { password: _, ...userWithoutPassword } = user;
 
     return NextResponse.json(
       {
-        message: 'User created successfully. Please check your email to verify your account.',
+        message:
+          "User created successfully. Please check your email to verify your account.",
         user: userWithoutPassword,
       },
       { status: 201 }
     );
   } catch (error: any) {
-    console.error('Signup error:', error);
+    console.error("Signup error:", error);
     return NextResponse.json(
-      { error: 'Failed to create user. Please try again.' },
+      { error: "Failed to create user. Please try again." },
       { status: 500 }
     );
   }
 }
-
-

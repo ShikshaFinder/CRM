@@ -1,0 +1,216 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+
+interface InventoryStock {
+  id: string;
+  quantity: number;
+  mfgDate: string | null;
+  expiryDate: string | null;
+  product: {
+    id: string;
+    name: string;
+    category: string;
+    unit: string;
+  };
+  storageLocation: {
+    id: string;
+    name: string;
+    type: string;
+  } | null;
+  batch: {
+    id: string;
+    batchNumber: string;
+  } | null;
+}
+
+export default function InventoryPage() {
+  const [stocks, setStocks] = useState<InventoryStock[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch('/api/inventory')
+      .then((res) => res.json())
+      .then((data) => {
+        setStocks(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError('Failed to load inventory');
+        setLoading(false);
+      });
+  }, []);
+
+  const getExpiryStatus = (expiryDate: string | null) => {
+    if (!expiryDate) return null;
+    const expiry = new Date(expiryDate);
+    const now = new Date();
+    const diffDays = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 0) return { status: 'expired', days: Math.abs(diffDays) };
+    if (diffDays <= 7) return { status: 'expiring', days: diffDays };
+    if (diffDays <= 30) return { status: 'warning', days: diffDays };
+    return { status: 'ok', days: diffDays };
+  };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
+        <div className="text-lg text-zinc-600 dark:text-zinc-400">Loading inventory...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
+        <div className="text-lg text-red-600 dark:text-red-400">{error}</div>
+      </div>
+    );
+  }
+
+  const totalQuantity = stocks.reduce((sum, stock) => sum + stock.quantity, 0);
+
+  return (
+    <div className="min-h-screen bg-zinc-50 dark:bg-black py-16 px-8">
+      <div className="max-w-7xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-12"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-4xl font-semibold text-black dark:text-zinc-50 mb-2">
+                Inventory
+              </h1>
+              <p className="text-lg text-zinc-600 dark:text-zinc-400">
+                Track your stock levels
+              </p>
+            </div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white dark:bg-zinc-900 rounded-lg px-6 py-4 border border-black/[.08] dark:border-white/[.145]"
+            >
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">Total Items</p>
+              <p className="text-2xl font-semibold text-black dark:text-zinc-50">{totalQuantity.toLocaleString()}</p>
+            </motion.div>
+          </div>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {stocks.map((stock, index) => {
+            const expiryStatus = getExpiryStatus(stock.expiryDate);
+            return (
+              <motion.div
+                key={stock.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.05 }}
+                whileHover={{ scale: 1.02, y: -4 }}
+                className="bg-white dark:bg-zinc-900 rounded-lg p-6 shadow-sm border border-black/[.08] dark:border-white/[.145] hover:shadow-md transition-shadow"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-black dark:text-zinc-50 mb-1">
+                      {stock.product.name}
+                    </h3>
+                    <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                      {stock.product.category}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-black dark:text-zinc-50">
+                      {stock.quantity}
+                    </p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-500">
+                      {stock.product.unit}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-2 text-sm border-t border-zinc-200 dark:border-zinc-800 pt-4">
+                  {stock.storageLocation && (
+                    <div className="flex justify-between">
+                      <span className="text-zinc-600 dark:text-zinc-400">Location:</span>
+                      <span className="text-black dark:text-zinc-50 font-medium">
+                        {stock.storageLocation.name}
+                      </span>
+                    </div>
+                  )}
+
+                  {stock.batch && (
+                    <div className="flex justify-between">
+                      <span className="text-zinc-600 dark:text-zinc-400">Batch:</span>
+                      <span className="text-black dark:text-zinc-50 font-medium">
+                        {stock.batch.batchNumber}
+                      </span>
+                    </div>
+                  )}
+
+                  {stock.mfgDate && (
+                    <div className="flex justify-between">
+                      <span className="text-zinc-600 dark:text-zinc-400">Manufactured:</span>
+                      <span className="text-black dark:text-zinc-50 font-medium">
+                        {new Date(stock.mfgDate).toLocaleDateString()}
+                      </span>
+                    </div>
+                  )}
+
+                  {stock.expiryDate && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-zinc-600 dark:text-zinc-400">Expires:</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-black dark:text-zinc-50 font-medium">
+                          {new Date(stock.expiryDate).toLocaleDateString()}
+                        </span>
+                        {expiryStatus && (
+                          <span
+                            className={`inline-block px-2 py-1 rounded text-xs font-medium ${
+                              expiryStatus.status === 'expired'
+                                ? 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
+                                : expiryStatus.status === 'expiring'
+                                ? 'bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200'
+                                : expiryStatus.status === 'warning'
+                                ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200'
+                                : 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
+                            }`}
+                          >
+                            {expiryStatus.status === 'expired'
+                              ? `Expired ${expiryStatus.days}d ago`
+                              : expiryStatus.status === 'expiring'
+                              ? `${expiryStatus.days}d left`
+                              : expiryStatus.status === 'warning'
+                              ? `${expiryStatus.days}d left`
+                              : `${expiryStatus.days}d left`}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+
+        {stocks.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-12"
+          >
+            <p className="text-zinc-600 dark:text-zinc-400">No inventory items found</p>
+          </motion.div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+

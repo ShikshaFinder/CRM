@@ -21,10 +21,10 @@ model User {
   email              String              @unique
   password           String
   isActive           Int                 @default(1) // Boolean as Int (1=true, 0=false)
-  emailVerified      Boolean             @default(false)
+  emailVerified      Int                 @default(0) // Boolean as Int (1=true, 0=false)
   createdAt          Int // Unix timestamp
   updatedAt          Int // Unix timestamp
-  lastLoginAt        Int? // Unix timestamp
+  lastLoginAt        Int? // Unix timestamp 
   profile            UserProfile?
   roles              UserRole[]
   departmentId       String?

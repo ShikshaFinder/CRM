@@ -1,14 +1,14 @@
-import { NextResponse } from 'next/server';
-import prisma from '../../../../lib/prisma';
+import { NextResponse } from "next/server";
+import prisma from "../../../../lib/prisma";
 
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const token = searchParams.get('token');
+    const token = searchParams.get("token");
 
     if (!token) {
       return NextResponse.json(
-        { error: 'Verification token is required' },
+        { error: "Verification token is required" },
         { status: 400 }
       );
     }
@@ -21,7 +21,7 @@ export async function GET(req: Request) {
 
     if (!verificationToken) {
       return NextResponse.json(
-        { error: 'Invalid or expired verification token' },
+        { error: "Invalid or expired verification token" },
         { status: 400 }
       );
     }
@@ -33,7 +33,7 @@ export async function GET(req: Request) {
         where: { token },
       });
       return NextResponse.json(
-        { error: 'Verification token has expired. Please request a new one.' },
+        { error: "Verification token has expired. Please request a new one." },
         { status: 400 }
       );
     }
@@ -42,8 +42,8 @@ export async function GET(req: Request) {
     const user = await prisma.user.update({
       where: { id: verificationToken.userId },
       data: {
-        emailVerified: true,
-        isActive: true,
+        emailVerified: 1,
+        isActive: 1,
       },
     });
 
@@ -54,15 +54,16 @@ export async function GET(req: Request) {
 
     return NextResponse.json(
       {
-        message: 'Email verified successfully. Your account has been activated.',
+        message:
+          "Email verified successfully. Your account has been activated.",
         verified: true,
       },
       { status: 200 }
     );
   } catch (error: any) {
-    console.error('Email verification error:', error);
+    console.error("Email verification error:", error);
     return NextResponse.json(
-      { error: 'Failed to verify email. Please try again.' },
+      { error: "Failed to verify email. Please try again." },
       { status: 500 }
     );
   }
@@ -75,7 +76,7 @@ export async function POST(req: Request) {
 
     if (!token) {
       return NextResponse.json(
-        { error: 'Verification token is required' },
+        { error: "Verification token is required" },
         { status: 400 }
       );
     }
@@ -88,7 +89,7 @@ export async function POST(req: Request) {
 
     if (!verificationToken) {
       return NextResponse.json(
-        { error: 'Invalid or expired verification token' },
+        { error: "Invalid or expired verification token" },
         { status: 400 }
       );
     }
@@ -100,7 +101,7 @@ export async function POST(req: Request) {
         where: { token },
       });
       return NextResponse.json(
-        { error: 'Verification token has expired. Please request a new one.' },
+        { error: "Verification token has expired. Please request a new one." },
         { status: 400 }
       );
     }
@@ -109,8 +110,8 @@ export async function POST(req: Request) {
     const user = await prisma.user.update({
       where: { id: verificationToken.userId },
       data: {
-        emailVerified: true,
-        isActive: true,
+        emailVerified: 1,
+        isActive: 1,
       },
     });
 
@@ -121,18 +122,17 @@ export async function POST(req: Request) {
 
     return NextResponse.json(
       {
-        message: 'Email verified successfully. Your account has been activated.',
+        message:
+          "Email verified successfully. Your account has been activated.",
         verified: true,
       },
       { status: 200 }
     );
   } catch (error: any) {
-    console.error('Email verification error:', error);
+    console.error("Email verification error:", error);
     return NextResponse.json(
-      { error: 'Failed to verify email. Please try again.' },
+      { error: "Failed to verify email. Please try again." },
       { status: 500 }
     );
   }
 }
-
-

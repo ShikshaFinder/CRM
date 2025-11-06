@@ -1,93 +1,97 @@
-import { PrismaAdapter } from '@next-auth/prisma-adapter'
-import CredentialsProvider from 'next-auth/providers/credentials'
-import bcrypt from 'bcrypt'
-import prisma from './prisma'
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import CredentialsProvider from "next-auth/providers/credentials";
+import bcrypt from "bcrypt";
+import prisma from "./prisma";
 
 export const authOptions: any = {
   adapter: PrismaAdapter(prisma as any),
   session: {
-    strategy: 'jwt'
+    strategy: "jwt",
   },
   providers: [
     CredentialsProvider({
-      name: 'Credentials',
+      name: "Credentials",
       credentials: {
-        email: { label: 'Email', type: 'text' },
-        password: { label: 'Password', type: 'password' }
+        email: { label: "Email", type: "text" },
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials: any) {
-        if (!credentials?.email || !credentials?.password) return null
-        const user = await prisma.user.findUnique({ 
+        if (!credentials?.email || !credentials?.password) return null;
+        const user = await prisma.user.findUnique({
           where: { email: credentials.email },
           include: {
             profile: true,
             roles: {
               include: {
-                role: true
-              }
+                role: true,
+              },
             },
-            department: true
-          }
-        })
-        if (!user) return null
-        
+            department: true,
+          },
+        });
+        if (!user) return null;
+
         // Check if user is active
         if (!user.isActive) {
-          throw new Error('Your account is not active. Please verify your email first.')
+          throw new Error(
+            "Your account is not active. Please verify your email first."
+          );
         }
-        
+
         // Check if email is verified
         if (!user.emailVerified) {
-          throw new Error('Please verify your email address before signing in.')
+          throw new Error(
+            "Please verify your email address before signing in."
+          );
         }
-        
+
         // Passwords in seed are plaintext 'changeme' - in production store hashed passwords
-        const isHashed = user.password && user.password.startsWith('$2')
+        const isHashed = user.password && user.password.startsWith("$2");
         const valid = isHashed
           ? await bcrypt.compare(credentials.password, user.password)
-          : credentials.password === user.password
-        if (!valid) return null
-        
+          : credentials.password === user.password;
+        if (!valid) return null;
+
         // Update last login
         await prisma.user.update({
           where: { id: user.id },
-          data: { lastLoginAt: Math.floor(Date.now() / 1000) }
-        })
-        
-        return { 
-          id: user.id, 
+          data: { lastLoginAt: Math.floor(Date.now() / 1000) },
+        });
+
+        return {
+          id: user.id,
           email: user.email,
           profile: user.profile,
-          roles: user.roles.map(ur => ur.role.name),
-          department: user.department?.name
-        }
-      }
-    })
+          roles: user.roles.map((ur) => ur.role.name),
+          department: user.department?.name,
+        };
+      },
+    }),
   ],
   callbacks: {
     async jwt({ token, user }: any) {
       if (user) {
-        token.sub = user.id
-        token.email = user.email
-        token.profile = user.profile
-        token.roles = user.roles
-        token.department = user.department
+        token.sub = user.id;
+        token.email = user.email;
+        token.profile = user.profile;
+        token.roles = user.roles;
+        token.department = user.department;
       }
-      return token
+      return token;
     },
     async session({ session, token }: any) {
       if (token?.sub) {
-        session.user = { 
-          id: token.sub, 
+        session.user = {
+          id: token.sub,
           email: token.email || session.user?.email,
           profile: token.profile,
           roles: token.roles || [],
-          department: token.department
-        }
+          department: token.department,
+        };
       }
-      return session
-    }
-  }
-}
+      return session;
+    },
+  },
+};
 
-export default authOptions
+export default authOptions;
