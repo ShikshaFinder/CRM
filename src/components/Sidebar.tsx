@@ -12,21 +12,17 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { name: 'Dashboard', href: '/', icon: '📊' },
-  { name: 'Products', href: '/products', icon: '📦' },
-  { name: 'Orders', href: '/orders', icon: '🛒' },
-  { name: 'Customers', href: '/customers', icon: '👥' },
-  { name: 'Inventory', href: '/inventory', icon: '📋' },
-  { name: 'Production', href: '/production', icon: '🏭' },
-  { name: 'Procurements', href: '/procurements', icon: '🥛' },
+  { name: 'Dashboard', href: '/', icon: '🏠' },
   { name: 'Connections', href: '/connections', icon: '🔗' },
-  { name: 'Marketing', href: '/marketing', icon: '📢' },
-  { name: 'HR', href: '/hr', icon: '👔' },
-  { name: 'Finance', href: '/finance', icon: '💰' },
-  { name: 'Compliance', href: '/compliance', icon: '📄' },
-  { name: 'Logistics', href: '/logistics', icon: '🚚' },
-  { name: 'Communications', href: '/communications', icon: '💬' },
-  { name: 'Analytics', href: '/analytics', icon: '📈' },
+  { name: 'Products', href: '/products', icon: '📦' },
+  { name: 'Milk Procurement', href: '/procurements', icon: '🥛' },
+  { name: 'Production', href: '/production', icon: '🏭' },
+  { name: 'Sales', href: '/orders', icon: '👜' },
+  { name: 'Inventory', href: '/inventory', icon: '🛒' },
+  { name: 'Delivery', href: '/delivery', icon: '🚚' },
+  { name: 'Support', href: '/support', icon: '🎧' },
+  { name: 'Reports', href: '/reports', icon: '📄' },
+  { name: 'Settings', href: '/settings', icon: '⚙️' },
 ];
 
 export default function Sidebar() {
@@ -97,7 +93,7 @@ export default function Sidebar() {
           width: isOpen ? 280 : 80,
         }}
         className={`
-          fixed left-0 top-0 h-full bg-white border-r border-black/[.08]
+          fixed left-0 top-0 h-full bg-slate-800 border-r border-slate-700
           z-30
           ${isMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
         `}
@@ -105,7 +101,7 @@ export default function Sidebar() {
       >
         <div className="flex flex-col h-full">
           {/* Logo/Header */}
-          <div className="flex items-center justify-between p-4 border-b border-black/[.08]">
+          <div className="flex items-center justify-between p-4 border-b border-slate-700">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: isOpen ? 1 : 0 }}
@@ -113,18 +109,18 @@ export default function Sidebar() {
               className="overflow-hidden"
             >
               <Link href="/" className="flex items-center gap-2">
-                <span className="text-2xl font-semibold text-black">
+                <span className="text-2xl font-semibold text-white">
                   Flavi CRM
                 </span>
               </Link>
             </motion.div>
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="hidden md:flex p-2 rounded-lg hover:bg-zinc-100 transition-colors"
+              className="hidden md:flex p-2 rounded-lg hover:bg-slate-700 transition-colors"
               aria-label="Toggle sidebar"
             >
               <svg
-                className="w-5 h-5 text-black"
+                className="w-5 h-5 text-white"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -165,8 +161,8 @@ export default function Sidebar() {
                     className={`
                       flex items-center gap-3 px-4 py-3 rounded-lg transition-colors relative
                       ${isActive
-                        ? 'bg-black text-white font-medium'
-                        : 'text-zinc-700 hover:bg-zinc-100'
+                        ? 'bg-slate-700 text-white font-medium'
+                        : 'text-slate-300 hover:bg-slate-700/50 hover:text-white'
                       }
                     `}
                   >
@@ -194,7 +190,7 @@ export default function Sidebar() {
           </nav>
 
           {/* Footer/Auth Section */}
-          <div className="p-4 border-t border-black/[.08]">
+          <div className="p-4 border-t border-slate-700">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: isOpen ? 1 : 0 }}
@@ -203,7 +199,7 @@ export default function Sidebar() {
             >
               <Link
                 href="/api/auth/signin"
-                className="flex items-center gap-3 px-4 py-3 rounded-lg text-zinc-700 hover:bg-zinc-100 transition-colors"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-700/50 hover:text-white transition-colors"
               >
                 <span className="text-xl">🔐</span>
                 <span className="whitespace-nowrap">Sign In</span>

@@ -17,7 +17,18 @@ export const authOptions: any = {
       },
       async authorize(credentials: any) {
         if (!credentials?.email || !credentials?.password) return null
-        const user = await prisma.user.findUnique({ where: { email: credentials.email } })
+        const user = await prisma.user.findUnique({ 
+          where: { email: credentials.email },
+          include: {
+            profile: true,
+            roles: {
+              include: {
+                role: true
+              }
+            },
+            department: true
+          }
+        })
         if (!user) return null
         
         // Check if user is active
@@ -36,17 +47,44 @@ export const authOptions: any = {
           ? await bcrypt.compare(credentials.password, user.password)
           : credentials.password === user.password
         if (!valid) return null
-        return { id: user.id, email: user.email }
+        
+        // Update last login
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { lastLoginAt: Math.floor(Date.now() / 1000) }
+        })
+        
+        return { 
+          id: user.id, 
+          email: user.email,
+          profile: user.profile,
+          roles: user.roles.map(ur => ur.role.name),
+          department: user.department?.name
+        }
       }
     })
   ],
   callbacks: {
     async jwt({ token, user }: any) {
-      if (user) token.sub = user.id
+      if (user) {
+        token.sub = user.id
+        token.email = user.email
+        token.profile = user.profile
+        token.roles = user.roles
+        token.department = user.department
+      }
       return token
     },
     async session({ session, token }: any) {
-      if (token?.sub) session.user = { id: token.sub, email: session.user?.email }
+      if (token?.sub) {
+        session.user = { 
+          id: token.sub, 
+          email: token.email || session.user?.email,
+          profile: token.profile,
+          roles: token.roles || [],
+          department: token.department
+        }
+      }
       return session
     }
   }

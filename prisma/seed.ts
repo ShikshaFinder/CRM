@@ -1,5 +1,5 @@
 import { PrismaD1 } from "@prisma/adapter-d1";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../src/generated/prisma";
 import { config } from "../config";
 
 const adapter = new PrismaD1({
@@ -50,6 +50,7 @@ async function main() {
 
   console.log("Seeding sample admin user...");
   const adminEmail = "admin@flavi.local";
+  const now = Math.floor(Date.now() / 1000);
   const admin = await prisma.user.upsert({
     where: { email: adminEmail },
     update: {},
@@ -57,6 +58,8 @@ async function main() {
       email: adminEmail,
       password: "changeme",
       isActive: 1,
+      createdAt: now,
+      updatedAt: now,
       profile: {
         create: {
           fullName: "System Admin",
@@ -93,6 +96,8 @@ async function main() {
         businessCategory: "B2B",
         gstNumber: "GSTIN0000",
         creditLimit: 50000,
+        createdAt: now,
+        updatedAt: now,
       },
     });
   }
