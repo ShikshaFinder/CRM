@@ -10,5 +10,5 @@ command = "npm run db:generate && npm run build"
 
 [[d1_databases]]
 binding = "DB" # i.e. available in your Worker on env.DB
-database_name = "prisma-demo-db"
-database_id = "711fe14b-5588-44c3-9c65-add0646426a5"
+database_name = "crm-1"
+database_id = "e400ca26-1e7f-48c7-add0-4cedd12ce4fc"

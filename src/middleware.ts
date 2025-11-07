@@ -1,5 +1,5 @@
-import { withAuth } from 'next-auth/middleware';
-import { NextResponse } from 'next/server';
+import { withAuth } from "next-auth/middleware";
+import { NextResponse } from "next/server";
 
 export default withAuth(
   function middleware(req) {
@@ -11,24 +11,24 @@ export default withAuth(
       authorized: ({ token, req }) => {
         // Protect all routes except auth pages and public assets
         const { pathname } = req.nextUrl;
-        
+
         // Allow access to auth pages
         if (
-          pathname.startsWith('/api/auth') ||
-          pathname.startsWith('/signup') ||
-          pathname.startsWith('/verify-email') ||
-          pathname.startsWith('/reset-password') ||
-          pathname.startsWith('/forgot-password')
+          pathname.startsWith("/api/auth") ||
+          pathname.startsWith("/signup") ||
+          pathname.startsWith("/verify-email") ||
+          pathname.startsWith("/reset-password") ||
+          pathname.startsWith("/forgot-password")
         ) {
           return true;
         }
-        
+
         // Require authentication for all other routes
         return !!token;
       },
     },
     pages: {
-      signIn: '/api/auth/signin',
+      signIn: "/api/auth/signin",
     },
   }
 );
@@ -42,7 +42,6 @@ export const config = {
      * - favicon.ico (favicon file)
      * - public folder
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
-
