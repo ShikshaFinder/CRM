@@ -10,6 +10,7 @@ const adapter = new PrismaD1({
 
 const prisma = new PrismaClient({ adapter } as any);
 
+
 async function main() {
   console.log("Seeding roles and departments...");
 
