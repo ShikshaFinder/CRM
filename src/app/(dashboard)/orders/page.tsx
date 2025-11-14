@@ -1,7 +1,8 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { OrdersByStageChart } from "@/components/charts/OrdersByStageChart";
 
 interface OrderItem {
   id: string;
@@ -87,14 +88,27 @@ export default function OrdersPage() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mb-12"
+          className="mb-8"
         >
-          <h1 className="text-4xl font-semibold text-black mb-4">
-            Orders
-          </h1>
+          <h1 className="text-4xl font-semibold text-black mb-4">Orders</h1>
           <p className="text-lg text-zinc-600">
             View and manage sales orders
           </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mb-8 bg-white rounded-lg p-6 shadow-sm border border-black/[.08]"
+        >
+          <h2 className="text-xl font-semibold text-black mb-4">
+            Orders by Stage
+          </h2>
+          <p className="text-sm text-zinc-600 mb-4">
+            Distribution of orders across stages for this organization.
+          </p>
+          <OrdersByStageChart />
         </motion.div>
 
         <div className="space-y-6">

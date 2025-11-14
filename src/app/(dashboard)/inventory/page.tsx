@@ -1,7 +1,8 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { InventoryByProductChart } from "@/components/charts/InventoryByProductChart";
 
 interface InventoryStock {
   id: string;
@@ -80,16 +81,14 @@ export default function InventoryPage() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mb-12"
+          className="mb-8"
         >
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-4">
             <div>
               <h1 className="text-4xl font-semibold text-black mb-2">
                 Inventory
               </h1>
-              <p className="text-lg text-zinc-600">
-                Track your stock levels
-              </p>
+              <p className="text-lg text-zinc-600">Track your stock levels</p>
             </div>
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
@@ -98,9 +97,26 @@ export default function InventoryPage() {
               className="bg-white rounded-lg px-6 py-4 border border-black/8"
             >
               <p className="text-sm text-zinc-600">Total Items</p>
-              <p className="text-2xl font-semibold text-black">{totalQuantity.toLocaleString()}</p>
+              <p className="text-2xl font-semibold text-black">
+                {totalQuantity.toLocaleString()}
+              </p>
             </motion.div>
           </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="bg-white rounded-lg p-6 shadow-sm border border-black/8"
+          >
+            <h2 className="text-xl font-semibold text-black mb-4">
+              Top Products by Stock
+            </h2>
+            <p className="text-sm text-zinc-600 mb-4">
+              Shows the top products by current quantity across all locations.
+            </p>
+            <InventoryByProductChart />
+          </motion.div>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

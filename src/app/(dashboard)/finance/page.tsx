@@ -1,7 +1,8 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { FinanceInvoicesChart } from "@/components/charts/FinanceInvoicesChart";
 
 interface Payment {
   id: string;
@@ -82,9 +83,9 @@ export default function FinancePage() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mb-12"
+          className="mb-8"
         >
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <h1 className="text-4xl font-semibold text-black mb-2">
                 Finance & Invoices
@@ -101,7 +102,9 @@ export default function FinancePage() {
                 className="bg-white rounded-lg px-6 py-4 border border-black/8"
               >
                 <p className="text-sm text-zinc-600">Total</p>
-                <p className="text-2xl font-semibold text-black">₹{totalAmount.toLocaleString()}</p>
+                <p className="text-2xl font-semibold text-black">
+                  ₹{totalAmount.toLocaleString()}
+                </p>
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -110,10 +113,27 @@ export default function FinancePage() {
                 className="bg-white rounded-lg px-6 py-4 border border-black/8"
               >
                 <p className="text-sm text-zinc-600">Outstanding</p>
-                <p className="text-2xl font-semibold text-black">₹{totalOutstanding.toLocaleString()}</p>
+                <p className="text-2xl font-semibold text-black">
+                  ₹{totalOutstanding.toLocaleString()}
+                </p>
               </motion.div>
             </div>
           </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mb-10 bg-white rounded-lg p-6 shadow-sm border border-black/8"
+        >
+          <h2 className="text-xl font-semibold text-black mb-4">
+            Invoiced vs Paid (Monthly)
+          </h2>
+          <p className="text-sm text-zinc-600 mb-4">
+            Monthly totals based on invoices and their payments.
+          </p>
+          <FinanceInvoicesChart />
         </motion.div>
 
         <div className="space-y-6">

@@ -1,7 +1,8 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { ProcurementVolumeChart } from "@/components/charts/ProcurementVolumeChart";
 
 interface ProcurementEntry {
   id: string;
@@ -96,9 +97,9 @@ export default function ProcurementsPage() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mb-12"
+          className="mb-8"
         >
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-4">
             <div>
               <h1 className="text-4xl font-semibold text-black mb-2">
                 Milk Procurements
@@ -115,7 +116,9 @@ export default function ProcurementsPage() {
                 className="bg-white rounded-lg px-6 py-4 border border-black/[.08]"
               >
                 <p className="text-sm text-zinc-600">Total Quantity</p>
-                <p className="text-2xl font-semibold text-black">{totalQuantity.toLocaleString()}L</p>
+                <p className="text-2xl font-semibold text-black">
+                  {totalQuantity.toLocaleString()}L
+                </p>
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -124,10 +127,27 @@ export default function ProcurementsPage() {
                 className="bg-white rounded-lg px-6 py-4 border border-black/[.08]"
               >
                 <p className="text-sm text-zinc-600">Total Amount</p>
-                <p className="text-2xl font-semibold text-black">₹{totalAmount.toLocaleString()}</p>
+                <p className="text-2xl font-semibold text-black">
+                  ₹{totalAmount.toLocaleString()}
+                </p>
               </motion.div>
             </div>
           </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="mb-8 bg-white rounded-lg p-6 shadow-sm border border-black/[.08]"
+          >
+            <h2 className="text-xl font-semibold text-black mb-4">
+              Milk Volume (Last 30 Days)
+            </h2>
+            <p className="text-sm text-zinc-600 mb-4">
+              Daily total litres collected across all suppliers and centers.
+            </p>
+            <ProcurementVolumeChart />
+          </motion.div>
         </motion.div>
 
         <div className="space-y-6">

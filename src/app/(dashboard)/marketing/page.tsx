@@ -1,7 +1,8 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { CampaignsByMonthChart } from "@/components/charts/CampaignsByMonthChart";
 
 interface Campaign {
   id: string;
@@ -53,7 +54,7 @@ export default function MarketingPage() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mb-12"
+          className="mb-8"
         >
           <h1 className="text-4xl font-semibold text-black mb-4">
             Marketing Campaigns
@@ -61,6 +62,21 @@ export default function MarketingPage() {
           <p className="text-lg text-zinc-600">
             Manage your marketing activities
           </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mb-8 bg-white rounded-lg p-6 shadow-sm border border-black/8"
+        >
+          <h2 className="text-xl font-semibold text-black mb-4">
+            Campaigns per Month
+          </h2>
+          <p className="text-sm text-zinc-600 mb-4">
+            Number of campaigns created each month.
+          </p>
+          <CampaignsByMonthChart />
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
