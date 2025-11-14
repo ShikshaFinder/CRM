@@ -56,6 +56,7 @@ model Organization {
 
   owner     User                     @relation("OrganizationOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   memberships OrganizationMembership[]
+  defaultUsers User[] @relation("UserDefaultOrganization")
 
   connections        Connection[]
   products           Product[]

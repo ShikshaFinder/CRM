@@ -42,4 +42,9 @@ next-env.d.ts
 
 .wrangler
 
+# prisma generated client (recreated via `npx prisma generate`)
+src/generated/prisma/
+
+.wrangler
+
 !.env.example
