@@ -1,6 +1,7 @@
-import prisma from "../../../lib/prisma";
+import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import authOptions from "../../../lib/auth";
+import authOptions from "../../../../lib/auth";
+import prisma from "../../../../lib/prisma";
 
 const jsonResponse = (body: unknown, init?: ResponseInit) =>
   new Response(JSON.stringify(body), {
@@ -8,41 +9,22 @@ const jsonResponse = (body: unknown, init?: ResponseInit) =>
     ...init,
   });
 
-export async function GET(req: Request) {
+export async function PUT(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id || !session?.user?.currentOrganizationId) {
       return jsonResponse({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const products = await prisma.product.findMany({
-      where: {
-        organizationId: session.user.currentOrganizationId,
-      },
-      include: { priceHistory: true },
-      orderBy: { name: "asc" },
-    });
-
-    return jsonResponse(products);
-  } catch (error) {
-    console.error("Failed to fetch products", error);
-    return jsonResponse({ error: "Failed to fetch products" }, { status: 500 });
-  }
-}
-
-export async function POST(req: Request) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id || !session?.user?.currentOrganizationId) {
-      return jsonResponse({ error: "Unauthorized" }, { status: 401 });
-    }
-
+    const productId = params.id;
     const body = await req.json();
     const {
       name,
       category,
       subCategory,
-      description,
       unit,
       packSize,
       unitPrice,
@@ -65,10 +47,23 @@ export async function POST(req: Request) {
       );
     }
 
+    // Verify product belongs to user's organization
+    const existingProduct = await prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    if (!existingProduct) {
+      return jsonResponse({ error: "Product not found" }, { status: 404 });
+    }
+
+    if (existingProduct.organizationId !== session.user.currentOrganizationId) {
+      return jsonResponse({ error: "Unauthorized" }, { status: 403 });
+    }
+
     const parseOptionalNumber = (value: unknown) => {
       if (value === undefined || value === null || value === "") return null;
       const num = Number(value);
-      return Number.isNaN(num) ? NaN : num;
+      return Number.isNaN(num) ? null : num;
     };
 
     const parsedUnitPrice = parseOptionalNumber(unitPrice);
@@ -82,38 +77,14 @@ export async function POST(req: Request) {
     const parsedReorderLevel = parseOptionalNumber(reorderLevel);
     const parsedMOQ = parseOptionalNumber(minOrderQuantity);
 
-    const numericFields = [
-      { label: "unitPrice", value: parsedUnitPrice },
-      { label: "costPrice", value: parsedCostPrice },
-      { label: "minFatPercent", value: parsedMinFat },
-      { label: "minSnfPercent", value: parsedMinSnf },
-      { label: "shelfLifeDays", value: parsedShelfLife },
-      { label: "storageTempMin", value: parsedTempMin },
-      { label: "storageTempMax", value: parsedTempMax },
-      { label: "currentStock", value: parsedCurrentStock },
-      { label: "reorderLevel", value: parsedReorderLevel },
-      { label: "minOrderQuantity", value: parsedMOQ },
-    ];
-
-    for (const field of numericFields) {
-      if (field.value !== null && Number.isNaN(field.value)) {
-        return jsonResponse(
-          { error: `${field.label} must be a valid number` },
-          { status: 400 }
-        );
-      }
-    }
-
     const requiresColdChainInt = requiresColdChain ? 1 : 0;
-    const now = Math.floor(Date.now() / 1000);
 
-    const product = await prisma.product.create({
+    const product = await prisma.product.update({
+      where: { id: productId },
       data: {
-        organizationId: session.user.currentOrganizationId,
         name,
         category,
         subCategory: subCategory ?? null,
-        description: description ?? null,
         unit,
         packSize: packSize ?? null,
         unitPrice: parsedUnitPrice,
@@ -128,23 +99,50 @@ export async function POST(req: Request) {
         currentStock: parsedCurrentStock,
         reorderLevel: parsedReorderLevel,
         minOrderQuantity: parsedMOQ,
-        priceHistory:
-          parsedUnitPrice !== null || parsedCostPrice !== null
-            ? {
-                create: {
-                  unitPrice: parsedUnitPrice ?? 0,
-                  costPrice: parsedCostPrice,
-                  startDate: now,
-                },
-              }
-            : undefined,
       },
       include: { priceHistory: true },
     });
 
-    return jsonResponse(product, { status: 201 });
+    return jsonResponse(product);
   } catch (error) {
-    console.error("Failed to create product", error);
-    return jsonResponse({ error: "Failed to create product" }, { status: 500 });
+    console.error("Failed to update product", error);
+    return jsonResponse({ error: "Failed to update product" }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id || !session?.user?.currentOrganizationId) {
+      return jsonResponse({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const productId = params.id;
+
+    // Verify product belongs to user's organization
+    const existingProduct = await prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    if (!existingProduct) {
+      return jsonResponse({ error: "Product not found" }, { status: 404 });
+    }
+
+    if (existingProduct.organizationId !== session.user.currentOrganizationId) {
+      return jsonResponse({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    await prisma.product.delete({
+      where: { id: productId },
+    });
+
+    return jsonResponse({ message: "Product deleted successfully" });
+  } catch (error) {
+    console.error("Failed to delete product", error);
+    return jsonResponse({ error: "Failed to delete product" }, { status: 500 });
+  }
+}
+

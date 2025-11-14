@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import prisma from "@/lib/prisma";
 import { sendVerificationEmail } from "../../../../lib/email";
 import { randomBytes } from "crypto";
+import { checkRateLimit } from "../../../../lib/rate-limit";
 
 const ORG_ROLE_ADMIN = "ADMIN";
 
@@ -43,6 +44,22 @@ export async function POST(req: Request) {
       return NextResponse.json(
         { error: "Email, password, and organization name are required" },
         { status: 400 }
+      );
+    }
+
+    // Rate limiting: 3 signups per hour per IP
+    const clientIp = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
+    const rateLimitResult = checkRateLimit(`signup:${clientIp}`, {
+      maxRequests: 3,
+      windowMs: 60 * 60 * 1000, // 1 hour
+    });
+
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        {
+          error: "Too many signup attempts. Please try again later.",
+        },
+        { status: 429 }
       );
     }
 
@@ -146,7 +163,9 @@ export async function POST(req: Request) {
 
     if (!emailResult.success) {
       console.error("Failed to send verification email:", emailResult.error);
-      // Optionally rollback or alert admin
+      // Log but don't fail the signup - user can request resend
+    } else {
+      console.log(`Verification email sent to ${result.user.email} for organization ${organization.name}`);
     }
 
     // 🔹 Remove sensitive fields before returning

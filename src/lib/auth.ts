@@ -14,8 +14,64 @@ export const authOptions: any = {
       credentials: {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
+        magicLinkToken: { label: "Magic Link Token", type: "text" },
       },
       async authorize(credentials: any) {
+        // Handle magic link authentication
+        if (credentials?.magicLinkToken) {
+          const magicLinkToken = await prisma.magicLinkToken.findUnique({
+            where: { token: credentials.magicLinkToken },
+            include: {
+              user: {
+                include: {
+                  profile: true,
+                  roles: {
+                    include: {
+                      role: true,
+                    },
+                  },
+                  department: true,
+                  memberships: true,
+                },
+              },
+            },
+          });
+
+          if (
+            !magicLinkToken ||
+            new Date() > magicLinkToken.expiresAt ||
+            !magicLinkToken.user.emailVerified ||
+            !magicLinkToken.user.isActive
+          ) {
+            return null;
+          }
+
+          // Delete used token
+          await prisma.magicLinkToken.delete({
+            where: { token: credentials.magicLinkToken },
+          });
+
+          // Update last login
+          await prisma.user.update({
+            where: { id: magicLinkToken.user.id },
+            data: { lastLoginAt: Math.floor(Date.now() / 1000) },
+          });
+
+          return {
+            id: magicLinkToken.user.id,
+            email: magicLinkToken.user.email,
+            profile: magicLinkToken.user.profile,
+            roles: magicLinkToken.user.roles.map((ur) => ur.role.name),
+            department: magicLinkToken.user.department?.name,
+            defaultOrganizationId: magicLinkToken.user.defaultOrganizationId,
+            memberships: magicLinkToken.user.memberships.map((membership) => ({
+              organizationId: membership.organizationId,
+              role: membership.role,
+            })),
+          };
+        }
+
+        // Handle regular password authentication
         if (!credentials?.email || !credentials?.password) return null;
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
@@ -84,6 +140,20 @@ export const authOptions: any = {
         token.department = user.department;
         token.defaultOrganizationId = user.defaultOrganizationId;
         token.memberships = user.memberships;
+        
+        // Set current organization and role from default organization or first membership
+        if (user.defaultOrganizationId) {
+          const defaultMembership = user.memberships.find(
+            (m: any) => m.organizationId === user.defaultOrganizationId
+          );
+          if (defaultMembership) {
+            token.currentOrganizationId = user.defaultOrganizationId;
+            token.currentOrganizationRole = defaultMembership.role;
+          }
+        } else if (user.memberships && user.memberships.length > 0) {
+          token.currentOrganizationId = user.memberships[0].organizationId;
+          token.currentOrganizationRole = user.memberships[0].role;
+        }
       }
       return token;
     },
@@ -97,6 +167,8 @@ export const authOptions: any = {
           department: token.department,
           defaultOrganizationId: token.defaultOrganizationId,
           memberships: token.memberships || [],
+          currentOrganizationId: token.currentOrganizationId,
+          currentOrganizationRole: token.currentOrganizationRole,
         };
       }
       return session;

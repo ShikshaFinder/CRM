@@ -16,7 +16,10 @@ export default withAuth(
         if (
           pathname.startsWith("/api/auth") ||
           pathname.startsWith("/signup") ||
+          pathname.startsWith("/signin") ||
           pathname.startsWith("/verify-email") ||
+          pathname.startsWith("/magic-login") ||
+          pathname.startsWith("/accept-invite") ||
           pathname.startsWith("/reset-password") ||
           pathname.startsWith("/forgot-password")
         ) {

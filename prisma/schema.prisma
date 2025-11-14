@@ -44,6 +44,8 @@ model User {
   salesTargets          SalesTarget[]
   commissions           Commission[]
   verificationTokens    VerificationToken[]
+  magicLinkTokens       MagicLinkToken[] @relation("MagicLinkTokens")
+  invitationsSent       OrganizationInvite[] @relation("InvitedBy")
 }
 
 model Organization {
@@ -86,6 +88,7 @@ model Organization {
   commissions        Commission[]
   commissionRules    CommissionRule[]
   auditLogs          AuditLog[]
+  invites            OrganizationInvite[]
 }
 
 model OrganizationMembership {
@@ -659,4 +662,30 @@ model VerificationToken {
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt  DateTime
   createdAt  DateTime @default(now())
+}
+
+// Magic Link Login
+model MagicLinkToken {
+  id         String   @id @default(uuid())
+  token      String   @unique
+  userId     String
+  user       User     @relation("MagicLinkTokens", fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+}
+
+// Organization Invitations
+model OrganizationInvite {
+  id             String   @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  email          String
+  role           String   // "ADMIN" or "MEMBER"
+  invitedById    String
+  invitedBy      User     @relation("InvitedBy", fields: [invitedById], references: [id], onDelete: Cascade)
+  token          String   @unique
+  status         String   @default("PENDING") // "PENDING", "ACCEPTED", "CANCELLED", "EXPIRED"
+  expiresAt      DateTime
+  createdAt      Int      // Unix timestamp
+  updatedAt      Int      // Unix timestamp
 }

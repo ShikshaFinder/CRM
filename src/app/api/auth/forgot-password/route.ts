@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import prisma from '../../../../lib/prisma';
 import { sendPasswordResetEmail } from '../../../../lib/email';
 import { randomBytes } from 'crypto';
+import { checkRateLimit } from '../../../../lib/rate-limit';
 
 export async function POST(req: Request) {
   try {
@@ -12,6 +13,21 @@ export async function POST(req: Request) {
       return NextResponse.json(
         { error: 'Email is required' },
         { status: 400 }
+      );
+    }
+
+    // Rate limiting: 5 requests per hour per email
+    const rateLimitResult = checkRateLimit(`password-reset:${email.toLowerCase()}`, {
+      maxRequests: 5,
+      windowMs: 60 * 60 * 1000, // 1 hour
+    });
+
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        {
+          message: 'If an account exists with this email, a password reset link has been sent.',
+        },
+        { status: 200 } // Don't reveal rate limiting to prevent email enumeration
       );
     }
 
