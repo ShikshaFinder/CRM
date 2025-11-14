@@ -1,19 +1,28 @@
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import authOptions from "../../../lib/auth";
 import prisma from "../../../lib/prisma";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id || !session?.user?.currentOrganizationId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const procurements = await prisma.milkProcurementEntry.findMany({
+      where: {
+        organizationId: session.user.currentOrganizationId,
+      },
       include: { supplier: true, collectionCenter: true },
       orderBy: { datetime: "desc" },
     });
 
-    return new Response(JSON.stringify(procurements), {
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json(procurements);
   } catch (error) {
     console.error("Failed to fetch procurements", error);
-    return new Response(
-      JSON.stringify({ error: "Failed to fetch procurements" }),
+    return NextResponse.json(
+      { error: "Failed to fetch procurements" },
       { status: 500 }
     );
   }
@@ -21,11 +30,15 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id || !session?.user?.currentOrganizationId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await req.json();
     const {
       supplierId,
       collectionCenterId,
-      organizationId,
       datetime,
       quantityL,
       fatPercent,
@@ -41,16 +54,29 @@ export async function POST(req: Request) {
 
     if (
       !supplierId ||
-      !organizationId ||
       quantityL === undefined ||
       ratePerLitre === undefined
     ) {
-      return new Response(
-        JSON.stringify({
-          error:
-            "supplierId, organizationId, quantityL and ratePerLitre are required",
-        }),
+      return NextResponse.json(
+        {
+          error: "supplierId, quantityL and ratePerLitre are required",
+        },
         { status: 400 }
+      );
+    }
+
+    // Verify supplier belongs to user's organization
+    const supplier = await prisma.connection.findFirst({
+      where: {
+        id: supplierId,
+        organizationId: session.user.currentOrganizationId,
+      },
+    });
+
+    if (!supplier) {
+      return NextResponse.json(
+        { error: "Supplier not found or does not belong to your organization" },
+        { status: 404 }
       );
     }
 
@@ -70,7 +96,7 @@ export async function POST(req: Request) {
     const entry = await prisma.milkProcurementEntry.create({
       data: {
         supplierId,
-        organizationId,
+        organizationId: session.user.currentOrganizationId,
         collectionCenterId: collectionCenterId ?? null,
         datetime: parsedDatetime,
         quantityL: parsedQuantity,
@@ -90,14 +116,11 @@ export async function POST(req: Request) {
       include: { supplier: true, collectionCenter: true },
     });
 
-    return new Response(JSON.stringify(entry), {
-      status: 201,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json(entry, { status: 201 });
   } catch (error) {
     console.error("Failed to create procurement entry", error);
-    return new Response(
-      JSON.stringify({ error: "Failed to create procurement entry" }),
+    return NextResponse.json(
+      { error: "Failed to create procurement entry" },
       { status: 500 }
     );
   }
