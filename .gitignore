@@ -45,6 +45,13 @@ next-env.d.ts
 # prisma generated client (recreated via `npx prisma generate`)
 src/generated/prisma/
 
+# database files (binary, should not be committed)
+*.sqlite
+*.sqlite-journal
+*.db
+prisma/*.sqlite
+prisma/*.db
+
 .wrangler
 
 !.env.example
