@@ -28,16 +28,16 @@ export default function AnalyticsPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
-        <div className="text-lg text-zinc-600 dark:text-zinc-400">Loading analytics...</div>
+      <div className="flex min-h-screen items-center justify-center bg-zinc-50">
+        <div className="text-lg text-zinc-600">Loading analytics...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
-        <div className="text-lg text-red-600 dark:text-red-400">{error}</div>
+      <div className="flex min-h-screen items-center justify-center bg-zinc-50">
+        <div className="text-lg text-red-600">{error}</div>
       </div>
     );
   }
@@ -56,7 +56,7 @@ export default function AnalyticsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-black py-16 px-8">
+    <div className="min-h-screen bg-zinc-50 py-16 px-8">
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -64,10 +64,10 @@ export default function AnalyticsPage() {
           transition={{ duration: 0.5 }}
           className="mb-12"
         >
-          <h1 className="text-4xl font-semibold text-black dark:text-zinc-50 mb-4">
+          <h1 className="text-4xl font-semibold text-black mb-4">
             Analytics
           </h1>
-          <p className="text-lg text-zinc-600 dark:text-zinc-400">
+          <p className="text-lg text-zinc-600">
             Sales performance and insights
           </p>
         </motion.div>
@@ -77,10 +77,10 @@ export default function AnalyticsPage() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="bg-white dark:bg-zinc-900 rounded-lg p-6 shadow-sm border border-black/[.08] dark:border-white/[.145]"
+            className="bg-white rounded-lg p-6 shadow-sm border border-black/[.08]"
           >
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-2">Total Sales</p>
-            <p className="text-3xl font-semibold text-black dark:text-zinc-50">
+            <p className="text-sm text-zinc-600 mb-2">Total Sales</p>
+            <p className="text-3xl font-semibold text-black">
               ₹{totalSales.toLocaleString('en-IN', { maximumFractionDigits: 2 })}
             </p>
           </motion.div>
@@ -89,10 +89,10 @@ export default function AnalyticsPage() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="bg-white dark:bg-zinc-900 rounded-lg p-6 shadow-sm border border-black/[.08] dark:border-white/[.145]"
+            className="bg-white rounded-lg p-6 shadow-sm border border-black/[.08]"
           >
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-2">Periods Tracked</p>
-            <p className="text-3xl font-semibold text-black dark:text-zinc-50">
+            <p className="text-sm text-zinc-600 mb-2">Periods Tracked</p>
+            <p className="text-3xl font-semibold text-black">
               {salesSummary.length}
             </p>
           </motion.div>
@@ -101,10 +101,10 @@ export default function AnalyticsPage() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="bg-white dark:bg-zinc-900 rounded-lg p-6 shadow-sm border border-black/[.08] dark:border-white/[.145]"
+            className="bg-white rounded-lg p-6 shadow-sm border border-black/[.08]"
           >
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-2">Average per Period</p>
-            <p className="text-3xl font-semibold text-black dark:text-zinc-50">
+            <p className="text-sm text-zinc-600 mb-2">Average per Period</p>
+            <p className="text-3xl font-semibold text-black">
               ₹{salesSummary.length > 0 ? (totalSales / salesSummary.length).toLocaleString('en-IN', { maximumFractionDigits: 2 }) : '0'}
             </p>
           </motion.div>
@@ -114,9 +114,9 @@ export default function AnalyticsPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="bg-white dark:bg-zinc-900 rounded-lg p-6 shadow-sm border border-black/[.08] dark:border-white/[.145]"
+          className="bg-white rounded-lg p-6 shadow-sm border border-black/[.08]"
         >
-          <h2 className="text-xl font-semibold text-black dark:text-zinc-50 mb-6">
+          <h2 className="text-xl font-semibold text-black mb-6">
             Monthly Sales Summary
           </h2>
           <div className="space-y-4">
@@ -132,19 +132,19 @@ export default function AnalyticsPage() {
                   className="space-y-2"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-black dark:text-zinc-50">
+                    <span className="text-sm font-medium text-black">
                       {formatMonth(item.month)}
                     </span>
-                    <span className="text-sm font-semibold text-black dark:text-zinc-50">
+                    <span className="text-sm font-semibold text-black">
                       ₹{amount.toLocaleString('en-IN', { maximumFractionDigits: 2 })}
                     </span>
                   </div>
-                  <div className="w-full bg-zinc-200 dark:bg-zinc-800 rounded-full h-3 overflow-hidden">
+                  <div className="w-full bg-zinc-200 rounded-full h-3 overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${percentage}%` }}
                       transition={{ duration: 0.8, delay: 0.6 + index * 0.1 }}
-                      className="h-full bg-blue-600 dark:bg-blue-500 rounded-full"
+                      className="h-full bg-blue-600 rounded-full"
                     />
                   </div>
                 </motion.div>
@@ -154,7 +154,7 @@ export default function AnalyticsPage() {
 
           {salesSummary.length === 0 && (
             <div className="text-center py-8">
-              <p className="text-zinc-600 dark:text-zinc-400">No sales data available</p>
+              <p className="text-zinc-600">No sales data available</p>
             </div>
           )}
         </motion.div>

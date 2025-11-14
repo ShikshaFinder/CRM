@@ -1,5 +1,3 @@
-import dotenv from "dotenv";
-dotenv.config();
 
 export const config = {
   cloudflare: {
@@ -7,4 +5,7 @@ export const config = {
     account_id: process.env.CLOUDFLARE_ACCOUNT_ID!,
     db_id: process.env.CLOUDFLARE_DATABASE_ID!,
   },
+
 };
+
+console.log('Cloudflare D1 Config:', config.cloudflare);

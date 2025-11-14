@@ -46,7 +46,7 @@ export default function Sidebar() {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsMobileOpen(!isMobileOpen)}
-        className="fixed top-4 left-4 z-50 md:hidden p-2 rounded-lg bg-white border border-black/[.08] shadow-sm"
+        className="fixed top-4 left-4 z-50 md:hidden p-2 rounded-lg bg-white border border-black/8 shadow-sm"
         aria-label="Toggle menu"
       >
         <svg
@@ -166,7 +166,7 @@ export default function Sidebar() {
                       }
                     `}
                   >
-                    <span className="text-xl flex-shrink-0">{item.icon}</span>
+                    <span className="text-xl shrink-0">{item.icon}</span>
                     <motion.span
                       initial={{ opacity: 1 }}
                       animate={{ opacity: isOpen ? 1 : 0 }}
@@ -211,4 +211,5 @@ export default function Sidebar() {
     </>
   );
 }
+
 

@@ -29,19 +29,24 @@ export async function POST(req: Request) {
 
   const entry = await prisma.milkProcurementEntry.create({
     data: {
-      supplierId,
-      collectionCenterId: collectionCenterId ?? undefined,
-      datetime: datetime ? new Date(datetime) : undefined,
+      supplier: {
+        connect: { id: supplierId }
+      },
+      collectionCenter: collectionCenterId ? {
+        connect: { id: collectionCenterId }
+      } : undefined,
+      datetime: datetime ? Math.floor(new Date(datetime).getTime() / 1000) : Math.floor(Date.now() / 1000),
       quantityL: Number(quantityL),
-      fatPercent: fatPercent ?? undefined,
-      snfPercent: snfPercent ?? undefined,
-      clrReading: clrReading ?? undefined,
-      temperatureC: temperatureC ?? undefined,
+      fatPercent: fatPercent ? Number(fatPercent) : null,
+      snfPercent: snfPercent ? Number(snfPercent) : null,
+      clrReading: clrReading ? Number(clrReading) : null,
+      temperatureC: temperatureC ? Number(temperatureC) : null,
       qualityGrade: qualityGrade ?? 'A',
       ratePerLitre: Number(ratePerLitre),
-      totalAmount: totalAmount ?? Number(quantityL) * Number(ratePerLitre),
+      totalAmount: totalAmount ? Number(totalAmount) : Number(quantityL) * Number(ratePerLitre),
       paymentStatus: paymentStatus ?? 'PENDING',
-      milkType: milkType ?? undefined
+      milkType: milkType ?? null,
+      createdAt: Math.floor(Date.now() / 1000)
     }
   })
 

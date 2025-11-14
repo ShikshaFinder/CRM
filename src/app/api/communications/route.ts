@@ -12,13 +12,29 @@ export async function POST(req: Request) {
   if (body.type === 'notification') {
     const { userId, title, body: msg } = body
     if (!userId || !title) return new Response(JSON.stringify({ error: 'userId and title required' }), { status: 400 })
-    const n = await prisma.notification.create({ data: { userId, title, body: msg } })
+    const n = await prisma.notification.create({ 
+      data: { 
+        user: { connect: { id: userId } },
+        title, 
+        body: msg,
+        createdAt: Math.floor(Date.now() / 1000)
+      } 
+    })
     return new Response(JSON.stringify(n), { status: 201 })
   }
 
   if (body.type === 'ticket') {
     const { ticketNumber, connectionId, issueType, priority, status } = body
-    const t = await prisma.supportTicket.create({ data: { ticketNumber: ticketNumber ?? `T-${Date.now()}`, connectionId, issueType, priority: priority ?? 'MEDIUM', status: status ?? 'OPEN' } })
+    const t = await prisma.supportTicket.create({ 
+      data: { 
+        ticketNumber: ticketNumber ?? `T-${Date.now()}`, 
+        connection: { connect: { id: connectionId } },
+        issueType, 
+        priority: priority ?? 'MEDIUM', 
+        status: status ?? 'OPEN',
+        createdAt: Math.floor(Date.now() / 1000)
+      } 
+    })
     return new Response(JSON.stringify(t), { status: 201 })
   }
 

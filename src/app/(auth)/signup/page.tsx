@@ -74,18 +74,18 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-black flex items-center justify-center py-16 px-8">
+    <div className="min-h-screen bg-zinc-50 flex items-center justify-center py-16 px-8">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        <div className="bg-white dark:bg-zinc-900 rounded-lg p-8 shadow-sm border border-black/[.08] dark:border-white/[.145]">
-          <h1 className="text-3xl font-semibold text-black dark:text-zinc-50 mb-2">
+        <div className="bg-white rounded-lg p-8 shadow-sm border border-black/[.08]">
+          <h1 className="text-3xl font-semibold text-black mb-2">
             Create Account
           </h1>
-          <p className="text-zinc-600 dark:text-zinc-400 mb-6">
+          <p className="text-zinc-600 mb-6">
             Sign up to get started
           </p>
 
@@ -93,7 +93,7 @@ export default function SignupPage() {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-red-800 dark:text-red-200 text-sm"
+              className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-800 text-sm"
             >
               {error}
             </motion.div>
@@ -103,7 +103,7 @@ export default function SignupPage() {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded text-green-800 dark:text-green-200 text-sm"
+              className="mb-4 p-3 bg-green-50 border border-green-200 rounded text-green-800 text-sm"
             >
               Account created successfully! Please check your email to verify your account.
             </motion.div>
@@ -113,7 +113,7 @@ export default function SignupPage() {
             <div>
               <label
                 htmlFor="fullName"
-                className="block text-sm font-medium text-black dark:text-zinc-50 mb-1"
+                className="block text-sm font-medium text-black mb-1"
               >
                 Full Name (Optional)
               </label>
@@ -124,14 +124,14 @@ export default function SignupPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, fullName: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-black/[.08] dark:border-white/[.145] rounded-lg bg-white dark:bg-zinc-800 text-black dark:text-zinc-50 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-zinc-50"
+                className="w-full px-4 py-2 border border-black/[.08] rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
               />
             </div>
 
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-black dark:text-zinc-50 mb-1"
+                className="block text-sm font-medium text-black mb-1"
               >
                 Email *
               </label>
@@ -143,14 +143,14 @@ export default function SignupPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-black/[.08] dark:border-white/[.145] rounded-lg bg-white dark:bg-zinc-800 text-black dark:text-zinc-50 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-zinc-50"
+                className="w-full px-4 py-2 border border-black/[.08] rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
               />
             </div>
 
             <div>
               <label
                 htmlFor="phone"
-                className="block text-sm font-medium text-black dark:text-zinc-50 mb-1"
+                className="block text-sm font-medium text-black mb-1"
               >
                 Phone (Optional)
               </label>
@@ -161,14 +161,14 @@ export default function SignupPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, phone: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-black/[.08] dark:border-white/[.145] rounded-lg bg-white dark:bg-zinc-800 text-black dark:text-zinc-50 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-zinc-50"
+                className="w-full px-4 py-2 border border-black/[.08] rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
               />
             </div>
 
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-black dark:text-zinc-50 mb-1"
+                className="block text-sm font-medium text-black mb-1"
               >
                 Password *
               </label>
@@ -180,14 +180,14 @@ export default function SignupPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, password: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-black/[.08] dark:border-white/[.145] rounded-lg bg-white dark:bg-zinc-800 text-black dark:text-zinc-50 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-zinc-50"
+                className="w-full px-4 py-2 border border-black/[.08] rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
               />
             </div>
 
             <div>
               <label
                 htmlFor="confirmPassword"
-                className="block text-sm font-medium text-black dark:text-zinc-50 mb-1"
+                className="block text-sm font-medium text-black mb-1"
               >
                 Confirm Password *
               </label>
@@ -199,24 +199,24 @@ export default function SignupPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, confirmPassword: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-black/[.08] dark:border-white/[.145] rounded-lg bg-white dark:bg-zinc-800 text-black dark:text-zinc-50 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-zinc-50"
+                className="w-full px-4 py-2 border border-black/[.08] rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-black dark:bg-zinc-50 text-white dark:text-black rounded-lg font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 bg-black text-white rounded-lg font-medium hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Creating Account...' : 'Sign Up'}
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-zinc-600 dark:text-zinc-400">
+          <p className="mt-6 text-center text-sm text-zinc-600">
             Already have an account?{' '}
             <a
               href="/api/auth/signin"
-              className="text-black dark:text-zinc-50 font-medium hover:underline"
+              className="text-black font-medium hover:underline"
             >
               Sign in
             </a>

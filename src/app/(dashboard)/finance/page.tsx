@@ -45,25 +45,25 @@ export default function FinancePage() {
     const totalPaid = invoice.payments.reduce((sum, p) => sum + p.amount, 0);
     const remaining = invoice.totalAmount - totalPaid;
     
-    if (remaining <= 0) return { status: 'paid', amount: 0, color: 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' };
+    if (remaining <= 0) return { status: 'paid', amount: 0, color: 'bg-green-100 text-green-800' };
     if (invoice.dueDate && new Date(invoice.dueDate) < new Date()) {
-      return { status: 'overdue', amount: remaining, color: 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200' };
+      return { status: 'overdue', amount: remaining, color: 'bg-red-100 text-red-800' };
     }
-    return { status: 'pending', amount: remaining, color: 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200' };
+    return { status: 'pending', amount: remaining, color: 'bg-yellow-100 text-yellow-800' };
   };
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
-        <div className="text-lg text-zinc-600 dark:text-zinc-400">Loading invoices...</div>
+      <div className="flex min-h-screen items-center justify-center bg-zinc-50">
+        <div className="text-lg text-zinc-600">Loading invoices...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
-        <div className="text-lg text-red-600 dark:text-red-400">{error}</div>
+      <div className="flex min-h-screen items-center justify-center bg-zinc-50">
+        <div className="text-lg text-red-600">{error}</div>
       </div>
     );
   }
@@ -76,7 +76,7 @@ export default function FinancePage() {
   const totalOutstanding = totalAmount - totalPaid;
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-black py-16 px-8">
+    <div className="min-h-screen bg-zinc-50 py-16 px-8">
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -86,10 +86,10 @@ export default function FinancePage() {
         >
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-4xl font-semibold text-black dark:text-zinc-50 mb-2">
+              <h1 className="text-4xl font-semibold text-black mb-2">
                 Finance & Invoices
               </h1>
-              <p className="text-lg text-zinc-600 dark:text-zinc-400">
+              <p className="text-lg text-zinc-600">
                 Manage invoices and payments
               </p>
             </div>
@@ -98,19 +98,19 @@ export default function FinancePage() {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.2 }}
-                className="bg-white dark:bg-zinc-900 rounded-lg px-6 py-4 border border-black/[.08] dark:border-white/[.145]"
+                className="bg-white rounded-lg px-6 py-4 border border-black/8"
               >
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">Total</p>
-                <p className="text-2xl font-semibold text-black dark:text-zinc-50">₹{totalAmount.toLocaleString()}</p>
+                <p className="text-sm text-zinc-600">Total</p>
+                <p className="text-2xl font-semibold text-black">₹{totalAmount.toLocaleString()}</p>
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.3 }}
-                className="bg-white dark:bg-zinc-900 rounded-lg px-6 py-4 border border-black/[.08] dark:border-white/[.145]"
+                className="bg-white rounded-lg px-6 py-4 border border-black/8"
               >
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">Outstanding</p>
-                <p className="text-2xl font-semibold text-black dark:text-zinc-50">₹{totalOutstanding.toLocaleString()}</p>
+                <p className="text-sm text-zinc-600">Outstanding</p>
+                <p className="text-2xl font-semibold text-black">₹{totalOutstanding.toLocaleString()}</p>
               </motion.div>
             </div>
           </div>
@@ -127,19 +127,19 @@ export default function FinancePage() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.05 }}
                 whileHover={{ scale: 1.01, x: 4 }}
-                className="bg-white dark:bg-zinc-900 rounded-lg p-6 shadow-sm border border-black/[.08] dark:border-white/[.145] hover:shadow-md transition-shadow"
+                className="bg-white rounded-lg p-6 shadow-sm border border-black/8 hover:shadow-md transition-shadow"
               >
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
                   <div>
-                    <h3 className="text-xl font-semibold text-black dark:text-zinc-50 mb-1">
+                    <h3 className="text-xl font-semibold text-black mb-1">
                       {invoice.invoiceNumber}
                     </h3>
                     {invoice.salesOrder && (
-                      <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                      <p className="text-sm text-zinc-600">
                         Order: {invoice.salesOrder.orderRef}
                       </p>
                     )}
-                    <p className="text-sm text-zinc-500 dark:text-zinc-500 mt-1">
+                    <p className="text-sm text-zinc-500 mt-1">
                       Created: {new Date(invoice.createdAt).toLocaleDateString()}
                     </p>
                   </div>
@@ -147,7 +147,7 @@ export default function FinancePage() {
                     <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${paymentStatus.color}`}>
                       {paymentStatus.status.toUpperCase()}
                     </span>
-                    <p className="text-lg font-semibold text-black dark:text-zinc-50">
+                    <p className="text-lg font-semibold text-black">
                       ₹{invoice.totalAmount.toFixed(2)}
                     </p>
                   </div>
@@ -156,22 +156,22 @@ export default function FinancePage() {
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm mb-4">
                   {invoice.dueDate && (
                     <div>
-                      <span className="text-zinc-600 dark:text-zinc-400">Due Date:</span>
-                      <p className="text-black dark:text-zinc-50 font-medium">
+                      <span className="text-zinc-600">Due Date:</span>
+                      <p className="text-black font-medium">
                         {new Date(invoice.dueDate).toLocaleDateString()}
                       </p>
                     </div>
                   )}
                   <div>
-                    <span className="text-zinc-600 dark:text-zinc-400">Paid:</span>
-                    <p className="text-black dark:text-zinc-50 font-medium">
+                    <span className="text-zinc-600">Paid:</span>
+                    <p className="text-black font-medium">
                       ₹{totalPaid.toFixed(2)}
                     </p>
                   </div>
                   {paymentStatus.amount > 0 && (
                     <div>
-                      <span className="text-zinc-600 dark:text-zinc-400">Remaining:</span>
-                      <p className="text-black dark:text-zinc-50 font-medium">
+                      <span className="text-zinc-600">Remaining:</span>
+                      <p className="text-black font-medium">
                         ₹{paymentStatus.amount.toFixed(2)}
                       </p>
                     </div>
@@ -179,18 +179,18 @@ export default function FinancePage() {
                 </div>
 
                 {invoice.payments.length > 0 && (
-                  <div className="border-t border-zinc-200 dark:border-zinc-800 pt-4">
-                    <h4 className="text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-2">
+                  <div className="border-t border-zinc-200 pt-4">
+                    <h4 className="text-sm font-medium text-zinc-600 mb-2">
                       Payments ({invoice.payments.length})
                     </h4>
                     <div className="space-y-2">
                       {invoice.payments.map((payment) => (
                         <div key={payment.id} className="flex justify-between items-center text-sm">
-                          <span className="text-zinc-700 dark:text-zinc-300">
+                          <span className="text-zinc-700">
                             {payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString() : 'No date'}
                             {payment.paymentMethod && ` • ${payment.paymentMethod}`}
                           </span>
-                          <span className="text-black dark:text-zinc-50 font-medium">
+                          <span className="text-black font-medium">
                             ₹{payment.amount.toFixed(2)}
                           </span>
                         </div>
@@ -209,12 +209,13 @@ export default function FinancePage() {
             animate={{ opacity: 1 }}
             className="text-center py-12"
           >
-            <p className="text-zinc-600 dark:text-zinc-400">No invoices found</p>
+            <p className="text-zinc-600">No invoices found</p>
           </motion.div>
         )}
       </div>
     </div>
   );
 }
+
 
 
