@@ -16,30 +16,87 @@ datasource db {
 
 // Core user and org models
 model User {
-  id             String      @id @default(uuid())
-  email          String      @unique
-  password       String
-  isActive       Int         @default(1) // Boolean as Int (1=true, 0=false)
-  emailVerified  Int     @default(0) // Boolean as Int (1=true, 0=false)
-  createdAt      Int         // Unix timestamp
-  updatedAt      Int         // Unix timestamp
-  lastLoginAt    Int?        // Unix timestamp 
-  profile        UserProfile?
-  roles          UserRole[]
-  departmentId   String?
-  department     Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
-  managerId      String?
-  manager        User?       @relation("UserManager", fields: [managerId], references: [id], onDelete: SetNull)
-  reports        User[]      @relation("UserManager")
-  activities     Activity[]
-  notifications  Notification[]
-  auditLogs      AuditLog[]
-  qualityTests   QualityTest[]
-  ticketComments TicketComment[]
-  documentsUploaded Document[]
-  salesTargets   SalesTarget[]
-  commissions    Commission[]
-  verificationTokens VerificationToken[]
+  id                    String      @id @default(uuid())
+  email                 String      @unique
+  password              String
+  isActive              Int         @default(1) // Boolean as Int (1=true, 0=false)
+  emailVerified         Int         @default(0) // Boolean as Int (1=true, 0=false)
+  createdAt             Int         // Unix timestamp
+  updatedAt             Int         // Unix timestamp
+  lastLoginAt           Int?        // Unix timestamp 
+  defaultOrganizationId String?
+  defaultOrganization   Organization? @relation("UserDefaultOrganization", fields: [defaultOrganizationId], references: [id], onDelete: SetNull)
+  ownedOrganizations    Organization[] @relation("OrganizationOwner")
+  memberships           OrganizationMembership[]
+  profile               UserProfile?
+  roles                 UserRole[]
+  departmentId          String?
+  department            Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  managerId             String?
+  manager               User?       @relation("UserManager", fields: [managerId], references: [id], onDelete: SetNull)
+  reports               User[]      @relation("UserManager")
+  activities            Activity[]
+  notifications         Notification[]
+  auditLogs             AuditLog[]
+  qualityTests          QualityTest[]
+  ticketComments        TicketComment[]
+  documentsUploaded     Document[]
+  salesTargets          SalesTarget[]
+  commissions           Commission[]
+  verificationTokens    VerificationToken[]
+}
+
+model Organization {
+  id        String                   @id @default(uuid())
+  name      String
+  slug      String                   @unique
+  ownerId   String
+  createdAt Int
+  updatedAt Int
+
+  owner     User                     @relation("OrganizationOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  memberships OrganizationMembership[]
+
+  connections        Connection[]
+  products           Product[]
+  milkCollectionCenters MilkCollectionCenter[]
+  milkProcurements   MilkProcurementEntry[]
+  milkRateCharts     MilkRateChart[]
+  productionBatches  ProductionBatch[]
+  qualityTests       QualityTest[]
+  salesInquiries     SalesInquiry[]
+  quotations         Quotation[]
+  salesOrders        SalesOrder[]
+  orderItems         OrderItem[]
+  invoices           Invoice[]
+  payments           Payment[]
+  deliveryChallans   DeliveryChallan[]
+  storageLocations   StorageLocation[]
+  inventoryStocks    InventoryStock[]
+  inventoryTransactions InventoryTransaction[]
+  purchaseOrders     PurchaseOrder[]
+  bills              Bill[]
+  supportTickets     SupportTicket[]
+  supplierFeedbacks  SupplierFeedback[]
+  activities         Activity[]
+  documents          Document[]
+  notifications      Notification[]
+  salesTargets       SalesTarget[]
+  commissions        Commission[]
+  commissionRules    CommissionRule[]
+  auditLogs          AuditLog[]
+}
+
+model OrganizationMembership {
+  id             String        @id @default(uuid())
+  userId         String
+  organizationId String
+  role           String
+
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
 }
 
 model UserProfile {
@@ -83,6 +140,8 @@ model Department {
 // Connections and contacts
 model Connection {
   id                 String           @id @default(uuid())
+  organizationId     String
+  organization       Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   name               String
   type               String           // e.g., "SUPPLIER", "CUSTOMER", "BOTH"
   businessCategory   String           // e.g., "DAIRY_FARM", "DISTRIBUTOR"
@@ -128,6 +187,8 @@ model FSSAILicense {
 // Products & catalog
 model Product {
   id                 String               @id @default(uuid())
+  organizationId     String
+  organization       Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   sku                String?              @unique
   name               String
   category           String               // e.g., "MILK", "CURD", "BUTTER"
@@ -168,6 +229,8 @@ model ProductPriceHistory {
 // Milk procurement
 model MilkCollectionCenter {
   id                 String   @id @default(uuid())
+  organizationId     String
+  organization       Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   name               String
   latitude           Float?    // Float for Float
   longitude          Float?    // Float for Float
@@ -179,6 +242,8 @@ model MilkCollectionCenter {
 
 model MilkProcurementEntry {
   id                String                     @id @default(uuid())
+  organizationId    String
+  organization      Organization               @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   supplierId        String
   supplier          Connection                 @relation(fields: [supplierId], references: [id], onDelete: Cascade)
   collectionCenterId String?
@@ -199,6 +264,8 @@ model MilkProcurementEntry {
 
 model MilkRateChart {
   id           String    @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   fatPercentMin Float     // Float for Float
   fatPercentMax Float     // Float for Float
   snfPercentMin Float     // Float for Float
@@ -213,6 +280,8 @@ model MilkRateChart {
 // Production
 model ProductionBatch {
   id               String                 @id @default(uuid())
+  organizationId   String
+  organization     Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   batchNumber      String                 @unique
   productId        String
   product          Product                @relation(fields: [productId], references: [id], onDelete: Cascade)
@@ -239,6 +308,8 @@ model ProductionBatchItem {
 // Quality control
 model QualityTest {
   id             String     @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   testDate       Int        // Unix timestamp
   testedById     String?
   testedBy       User?      @relation(fields: [testedById], references: [id], onDelete: SetNull)
@@ -252,6 +323,8 @@ model QualityTest {
 // Sales pipeline
 model SalesInquiry {
   id            String    @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   inquiryNumber String    @unique
   connectionId  String
   connection    Connection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
@@ -266,6 +339,8 @@ model SalesInquiry {
 
 model Quotation {
   id             String         @id @default(uuid())
+  organizationId String
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   quoteRef       String         @unique
   connectionId   String
   connection     Connection     @relation(fields: [connectionId], references: [id], onDelete: Cascade)
@@ -296,6 +371,8 @@ model QuoteLineItem {
 
 model SalesOrder {
   id             String    @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   orderRef       String    @unique
   connectionId   String
   connection     Connection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
@@ -310,6 +387,8 @@ model SalesOrder {
 
 model OrderItem {
   id            String     @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   salesOrder    SalesOrder @relation(fields: [salesOrderId], references: [id], onDelete: Cascade)
   salesOrderId  String
   productId     String
@@ -324,6 +403,8 @@ model OrderItem {
 
 model Invoice {
   id             String    @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   invoiceNumber  String    @unique
   salesOrderId   String?
   salesOrder     SalesOrder? @relation(fields: [salesOrderId], references: [id], onDelete: SetNull)
@@ -337,6 +418,8 @@ model Invoice {
 
 model Payment {
   id            String   @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   invoiceId     String?
   invoice       Invoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
   amount        Float     // Float for Float
@@ -349,6 +432,8 @@ model Payment {
 
 model DeliveryChallan {
   id              String   @id @default(uuid())
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   challanNumber   String   @unique
   salesOrderId    String?
   vehicleNumber   String?
@@ -363,6 +448,8 @@ model DeliveryChallan {
 // Inventory
 model StorageLocation {
   id             String   @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   name           String
   type           String   // Cold Room / Freezer / Refrigerated Warehouse
   capacity       Float?    // Float for Float
@@ -377,6 +464,8 @@ model StorageLocation {
 
 model InventoryStock {
   id               String          @id @default(uuid())
+  organizationId   String
+  organization     Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   productId        String
   product          Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
   batchId          String?
@@ -392,6 +481,8 @@ model InventoryStock {
 
 model InventoryTransaction {
   id               String   @id @default(uuid())
+  organizationId   String
+  organization     Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   stockId          String
   stock            InventoryStock @relation(fields: [stockId], references: [id], onDelete: Cascade)
   type             String   // e.g., "IN", "OUT", "ADJUSTMENT"
@@ -403,6 +494,8 @@ model InventoryTransaction {
 
 model PurchaseOrder {
   id             String    @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   poRef          String    @unique
   type           String
   supplierId     String
@@ -424,6 +517,8 @@ model POItem {
 
 model Bill {
   id           String   @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   billNumber   String   @unique
   supplierId   String
   supplier     Connection @relation(fields: [supplierId], references: [id], onDelete: Cascade)
@@ -435,6 +530,8 @@ model Bill {
 
 model SupportTicket {
   id           String      @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   ticketNumber String      @unique
   connectionId String?
   connection   Connection? @relation(fields: [connectionId], references: [id], onDelete: SetNull)
@@ -458,6 +555,8 @@ model TicketComment {
 
 model SupplierFeedback {
   id           String   @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   supplierId   String
   supplier     Connection @relation(fields: [supplierId], references: [id], onDelete: Cascade)
   feedbackType String
@@ -467,6 +566,8 @@ model SupplierFeedback {
 
 model Activity {
   id           String   @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   userId       String?
   user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   type         String
@@ -478,6 +579,8 @@ model Activity {
 
 model Document {
   id           String   @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   name         String
   path         String
   category     String?
@@ -490,6 +593,8 @@ model Document {
 
 model Notification {
   id        String   @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   title     String
@@ -501,6 +606,8 @@ model Notification {
 // Analytics & commission
 model SalesTarget {
   id        String   @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   userId    String?
   user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   period    String
@@ -510,6 +617,8 @@ model SalesTarget {
 
 model CommissionRule {
   id           String @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   productCategory String?
   minAmount    Float?  // Float for Float
   maxAmount    Float?  // Float for Float
@@ -518,6 +627,8 @@ model CommissionRule {
 
 model Commission {
   id           String  @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   userId       String?
   user         User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
   orderId      String?
@@ -528,6 +639,8 @@ model Commission {
 // Audit
 model AuditLog {
   id        String   @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   userId    String?
   user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   action    String
