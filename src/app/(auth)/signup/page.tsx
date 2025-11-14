@@ -1,21 +1,26 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { useRouter } from 'next/navigation';
 
 export default function SignupPage() {
-  const router = useRouter();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     confirmPassword: '',
     fullName: '',
     phone: '',
+    organizationName: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  const verifyEmailLink = useMemo(() => {
+    if (!formData.email) return null;
+    const params = new URLSearchParams({ email: formData.email });
+    return `/verify-email?${params.toString()}`;
+  }, [formData.email]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,8 +28,8 @@ export default function SignupPage() {
     setSuccess(false);
 
     // Validation
-    if (!formData.email || !formData.password) {
-      setError('Email and password are required');
+    if (!formData.email || !formData.password || !formData.organizationName) {
+      setError('Email, password, and organization name are required');
       return;
     }
 
@@ -51,6 +56,7 @@ export default function SignupPage() {
           password: formData.password,
           fullName: formData.fullName || undefined,
           phone: formData.phone || undefined,
+          organizationName: formData.organizationName,
         }),
       });
 
@@ -63,10 +69,7 @@ export default function SignupPage() {
       }
 
       setSuccess(true);
-      // Redirect to verification page after a delay
-      setTimeout(() => {
-        router.push('/verify-email?email=' + encodeURIComponent(formData.email));
-      }, 2000);
+      setLoading(false);
     } catch (err: any) {
       setError('An error occurred. Please try again.');
       setLoading(false);
@@ -81,7 +84,7 @@ export default function SignupPage() {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        <div className="bg-white rounded-lg p-8 shadow-sm border border-black/[.08]">
+        <div className="bg-white rounded-lg p-8 shadow-sm border border-black/8">
           <h1 className="text-3xl font-semibold text-black mb-2">
             Create Account
           </h1>
@@ -103,13 +106,58 @@ export default function SignupPage() {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-4 p-3 bg-green-50 border border-green-200 rounded text-green-800 text-sm"
+              className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900"
             >
-              Account created successfully! Please check your email to verify your account.
+              <p className="font-medium text-base">You're almost in!</p>
+              <p className="mt-1">
+                We just sent a verification link to <strong>{formData.email}</strong>.
+                Please confirm your email to activate your workspace.
+              </p>
+              <ul className="mt-3 space-y-1 text-zinc-700">
+                <li className="flex items-start gap-2">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                  Check your inbox and click <strong>“Verify email”</strong>.
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                  Look in spam or promotions if you don’t see it right away.
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                  Need another email? Use the resend option on the next screen.
+                </li>
+              </ul>
+              {verifyEmailLink && (
+                <a
+                  href={verifyEmailLink}
+                  className="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
+                >
+                  Go to Verify Email
+                </a>
+              )}
             </motion.div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label
+                htmlFor="organizationName"
+                className="block text-sm font-medium text-black mb-1"
+              >
+                Organization Name *
+              </label>
+              <input
+                id="organizationName"
+                type="text"
+                required
+                value={formData.organizationName}
+                onChange={(e) =>
+                  setFormData({ ...formData, organizationName: e.target.value })
+                }
+                className="w-full px-4 py-2 border border-black/8 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
+              />
+            </div>
+
             <div>
               <label
                 htmlFor="fullName"
@@ -124,7 +172,7 @@ export default function SignupPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, fullName: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-black/[.08] rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full px-4 py-2 border border-black/8 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
               />
             </div>
 
@@ -143,7 +191,7 @@ export default function SignupPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-black/[.08] rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full px-4 py-2 border border-black/8 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
               />
             </div>
 
@@ -161,7 +209,7 @@ export default function SignupPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, phone: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-black/[.08] rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full px-4 py-2 border border-black/8 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
               />
             </div>
 
@@ -180,7 +228,7 @@ export default function SignupPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, password: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-black/[.08] rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full px-4 py-2 border border-black/8 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
               />
             </div>
 
@@ -199,7 +247,7 @@ export default function SignupPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, confirmPassword: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-black/[.08] rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full px-4 py-2 border border-black/8 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
               />
             </div>
 

@@ -27,6 +27,7 @@ export const authOptions: any = {
               },
             },
             department: true,
+            memberships: true,
           },
         });
         if (!user) return null;
@@ -64,6 +65,11 @@ export const authOptions: any = {
           profile: user.profile,
           roles: user.roles.map((ur) => ur.role.name),
           department: user.department?.name,
+          defaultOrganizationId: user.defaultOrganizationId,
+          memberships: user.memberships.map((membership) => ({
+            organizationId: membership.organizationId,
+            role: membership.role,
+          })),
         };
       },
     }),
@@ -76,6 +82,8 @@ export const authOptions: any = {
         token.profile = user.profile;
         token.roles = user.roles;
         token.department = user.department;
+        token.defaultOrganizationId = user.defaultOrganizationId;
+        token.memberships = user.memberships;
       }
       return token;
     },
@@ -87,6 +95,8 @@ export const authOptions: any = {
           profile: token.profile,
           roles: token.roles || [],
           department: token.department,
+          defaultOrganizationId: token.defaultOrganizationId,
+          memberships: token.memberships || [],
         };
       }
       return session;

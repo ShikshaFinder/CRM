@@ -21,10 +21,10 @@ Goal: Convert the CRM into a multi-organization SaaS with org-level roles (ADMIN
 **Next actions derived from this phase:** update API and UI layers to supply `organizationId` from the authenticated session (covered in Phase 5/6)
 
 ## Phase 2 – Auth Core (Signup, Verification, Credentials Login)
-- [ ] Signup form collects user + org info, posts to new org-aware signup API
-- [ ] Signup API creates user, organization, membership, verification token, sends branded email
-- [ ] NextAuth credentials provider blocks logins until `emailVerified === 1`
-- [ ] Verification route/page validates token and activates the account
+- [x] Signup form collects user + org info, posts to new org-aware signup API
+- [x] Signup API creates user, organization, membership, verification token, sends verification email
+- [x] NextAuth credentials provider blocks logins until `emailVerified === 1` and now carries org context in the session
+- [ ] Verification route/page validates token and activates the account (existing endpoint works; will revisit if UX tweaks are needed)
 
 ## Phase 3 – Magic Link Login
 - [ ] Magic link request endpoint (Resend email with secure token)

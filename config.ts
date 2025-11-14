@@ -7,5 +7,3 @@ export const config = {
   },
 
 };
-
-console.log('Cloudflare D1 Config:', config.cloudflare);
