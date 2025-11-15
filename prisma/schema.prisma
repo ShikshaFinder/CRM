@@ -52,6 +52,7 @@ model Organization {
   id        String                   @id @default(uuid())
   name      String
   slug      String                   @unique
+  code      String                   @unique // 6-8 character alphanumeric code for joining
   ownerId   String
   createdAt Int
   updatedAt Int

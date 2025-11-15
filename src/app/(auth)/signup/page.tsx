@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 
 export default function SignupPage() {
+  const [signupType, setSignupType] = useState<'create' | 'join'>('create');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -11,6 +12,8 @@ export default function SignupPage() {
     fullName: '',
     phone: '',
     organizationName: '',
+    inviteCode: '',
+    organizationCode: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,9 +31,25 @@ export default function SignupPage() {
     setSuccess(false);
 
     // Validation
-    if (!formData.email || !formData.password || !formData.organizationName) {
-      setError('Email, password, and organization name are required');
+    if (!formData.email || !formData.password) {
+      setError('Email and password are required');
       return;
+    }
+
+    if (signupType === 'create' && !formData.organizationName) {
+      setError('Organization name is required');
+      return;
+    }
+
+    if (signupType === 'join') {
+      if (!formData.inviteCode) {
+        setError('Invite code is required');
+        return;
+      }
+      if (!formData.organizationCode) {
+        setError('Organization code is required');
+        return;
+      }
     }
 
     if (formData.password !== formData.confirmPassword) {
@@ -56,7 +75,10 @@ export default function SignupPage() {
           password: formData.password,
           fullName: formData.fullName || undefined,
           phone: formData.phone || undefined,
-          organizationName: formData.organizationName,
+          signupType,
+          organizationName: signupType === 'create' ? formData.organizationName : undefined,
+          inviteCode: signupType === 'join' ? formData.inviteCode : undefined,
+          organizationCode: signupType === 'join' ? formData.organizationCode : undefined,
         }),
       });
 
@@ -92,6 +114,43 @@ export default function SignupPage() {
             Sign up to get started
           </p>
 
+          {/* Signup Type Toggle */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-black mb-3">
+              I want to:
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setSignupType('create');
+                  setError(null);
+                }}
+                className={`px-4 py-3 rounded-lg border-2 font-medium transition-colors ${
+                  signupType === 'create'
+                    ? 'border-black bg-black text-white'
+                    : 'border-black/8 bg-white text-black hover:bg-zinc-50'
+                }`}
+              >
+                Create Organization
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSignupType('join');
+                  setError(null);
+                }}
+                className={`px-4 py-3 rounded-lg border-2 font-medium transition-colors ${
+                  signupType === 'join'
+                    ? 'border-black bg-black text-white'
+                    : 'border-black/8 bg-white text-black hover:bg-zinc-50'
+                }`}
+              >
+                Join Organization
+              </button>
+            </div>
+          </div>
+
           {error && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
@@ -111,7 +170,9 @@ export default function SignupPage() {
               <p className="font-medium text-base">You're almost in!</p>
               <p className="mt-1">
                 We just sent a verification link to <strong>{formData.email}</strong>.
-                Please confirm your email to activate your workspace.
+                {signupType === 'create'
+                  ? ' Please confirm your email to activate your workspace.'
+                  : ' Please confirm your email to join the organization.'}
               </p>
               <ul className="mt-3 space-y-1 text-zinc-700">
                 <li className="flex items-start gap-2">
@@ -139,24 +200,76 @@ export default function SignupPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label
-                htmlFor="organizationName"
-                className="block text-sm font-medium text-black mb-1"
-              >
-                Organization Name *
-              </label>
-              <input
-                id="organizationName"
-                type="text"
-                required
-                value={formData.organizationName}
-                onChange={(e) =>
-                  setFormData({ ...formData, organizationName: e.target.value })
-                }
-                className="w-full px-4 py-2 border border-black/8 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
-              />
-            </div>
+            {/* Conditional Fields based on signupType */}
+            {signupType === 'create' ? (
+              <div>
+                <label
+                  htmlFor="organizationName"
+                  className="block text-sm font-medium text-black mb-1"
+                >
+                  Organization Name *
+                </label>
+                <input
+                  id="organizationName"
+                  type="text"
+                  required={signupType === 'create'}
+                  value={formData.organizationName}
+                  onChange={(e) =>
+                    setFormData({ ...formData, organizationName: e.target.value })
+                  }
+                  className="w-full px-4 py-2 border border-black/8 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
+                  placeholder="Enter your organization name"
+                />
+              </div>
+            ) : (
+              <>
+                <div>
+                  <label
+                    htmlFor="inviteCode"
+                    className="block text-sm font-medium text-black mb-1"
+                  >
+                    Invite Code *
+                  </label>
+                  <input
+                    id="inviteCode"
+                    type="text"
+                    required={signupType === 'join'}
+                    value={formData.inviteCode}
+                    onChange={(e) =>
+                      setFormData({ ...formData, inviteCode: e.target.value.trim().toUpperCase() })
+                    }
+                    className="w-full px-4 py-2 border border-black/8 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black font-mono"
+                    placeholder="Enter invite code"
+                  />
+                  <p className="mt-1 text-xs text-zinc-500">
+                    You received this code in your invitation email
+                  </p>
+                </div>
+                <div>
+                  <label
+                    htmlFor="organizationCode"
+                    className="block text-sm font-medium text-black mb-1"
+                  >
+                    Organization Code *
+                  </label>
+                  <input
+                    id="organizationCode"
+                    type="text"
+                    required={signupType === 'join'}
+                    value={formData.organizationCode}
+                    onChange={(e) =>
+                      setFormData({ ...formData, organizationCode: e.target.value.trim().toUpperCase() })
+                    }
+                    className="w-full px-4 py-2 border border-black/8 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black font-mono"
+                    placeholder="Enter organization code"
+                    maxLength={6}
+                  />
+                  <p className="mt-1 text-xs text-zinc-500">
+                    6-character code provided by your organization
+                  </p>
+                </div>
+              </>
+            )}
 
             <div>
               <label
