@@ -26,14 +26,24 @@ export default function ProductionPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/production')
-      .then((res) => res.json())
+    fetch('/api/production', {
+      credentials: 'include',
+    })
+      .then((res) => {
+        if (!res.ok) {
+          return res.json().then((errorData) => {
+            throw new Error(errorData.error || `Request failed: ${res.status}`);
+          });
+        }
+        return res.json();
+      })
       .then((data) => {
-        setBatches(data);
+        setBatches(Array.isArray(data) ? data : []);
         setLoading(false);
       })
       .catch((err) => {
-        setError('Failed to load production batches');
+        setError(err.message || 'Failed to load production batches');
+        setBatches([]);
         setLoading(false);
       });
   }, []);
@@ -102,7 +112,7 @@ export default function ProductionPage() {
                     {batch.batchNumber}
                   </h3>
                   <p className="text-sm text-zinc-600">
-                    {batch.product.name}
+                    {batch.product?.name || 'Unknown Product'}
                   </p>
                 </div>
                 <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(batch.status)}`}>
@@ -114,7 +124,7 @@ export default function ProductionPage() {
                 <div className="flex justify-between">
                   <span className="text-zinc-600">Quantity:</span>
                   <span className="text-black font-medium">
-                    {batch.producedQty} {batch.product.unit}
+                    {batch.producedQty || 0} {batch.product?.unit || ''}
                   </span>
                 </div>
 
@@ -145,7 +155,7 @@ export default function ProductionPage() {
                   </div>
                 )}
 
-                {batch.items.length > 0 && (
+                {Array.isArray(batch.items) && batch.items.length > 0 && (
                   <div className="mt-3 pt-3 border-t border-zinc-200">
                     <p className="text-xs text-zinc-600 mb-1">
                       Items: {batch.items.length}
@@ -153,7 +163,7 @@ export default function ProductionPage() {
                   </div>
                 )}
 
-                {batch.inventoryStocks.length > 0 && (
+                {Array.isArray(batch.inventoryStocks) && batch.inventoryStocks.length > 0 && (
                   <div className="mt-2">
                     <p className="text-xs text-zinc-600">
                       In Stock: {batch.inventoryStocks.length} location(s)

@@ -35,11 +35,17 @@ export function CampaignsByMonthChart() {
 
     async function load() {
       try {
-        const res = await fetch("/api/marketing/campaigns")
+        const res = await fetch("/api/marketing/campaigns", {
+          credentials: 'include',
+        })
         if (!res.ok) {
-          throw new Error(`Request failed: ${res.status}`)
+          const errorData = await res.json().catch(() => ({}))
+          throw new Error(errorData.error || `Request failed: ${res.status}`)
         }
         const json = (await res.json()) as Campaign[]
+        if (!Array.isArray(json)) {
+          throw new Error("Invalid response format")
+        }
 
         const byMonth = new Map<string, number>()
         for (const c of json) {
@@ -61,7 +67,7 @@ export function CampaignsByMonthChart() {
         }
       } catch (err: any) {
         if (!cancelled) {
-          setError("Failed to load campaigns summary")
+          setError(err.message || "Failed to load campaigns summary")
           // eslint-disable-next-line no-console
           console.error(err)
         }

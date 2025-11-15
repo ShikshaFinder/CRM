@@ -22,14 +22,24 @@ export default function LogisticsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/logistics/delivery')
-      .then((res) => res.json())
+    fetch('/api/logistics/delivery', {
+      credentials: 'include',
+    })
+      .then((res) => {
+        if (!res.ok) {
+          return res.json().then((errorData) => {
+            throw new Error(errorData.error || `Request failed: ${res.status}`);
+          });
+        }
+        return res.json();
+      })
       .then((data) => {
-        setChallans(data);
+        setChallans(Array.isArray(data) ? data : []);
         setLoading(false);
       })
       .catch((err) => {
-        setError('Failed to load delivery challans');
+        setError(err.message || 'Failed to load delivery challans');
+        setChallans([]);
         setLoading(false);
       });
   }, []);

@@ -33,14 +33,24 @@ export default function ProcurementsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/procurements')
-      .then((res) => res.json())
+    fetch('/api/procurements', {
+      credentials: 'include',
+    })
+      .then((res) => {
+        if (!res.ok) {
+          return res.json().then((errorData) => {
+            throw new Error(errorData.error || `Request failed: ${res.status}`);
+          });
+        }
+        return res.json();
+      })
       .then((data) => {
-        setProcurements(data);
+        setProcurements(Array.isArray(data) ? data : []);
         setLoading(false);
       })
       .catch((err) => {
-        setError('Failed to load procurements');
+        setError(err.message || 'Failed to load procurements');
+        setProcurements([]);
         setLoading(false);
       });
   }, []);
@@ -87,8 +97,8 @@ export default function ProcurementsPage() {
     );
   }
 
-  const totalQuantity = procurements.reduce((sum, p) => sum + p.quantityL, 0);
-  const totalAmount = procurements.reduce((sum, p) => sum + p.totalAmount, 0);
+  const totalQuantity = procurements.reduce((sum, p) => sum + (p.quantityL || 0), 0);
+  const totalAmount = procurements.reduce((sum, p) => sum + (p.totalAmount || 0), 0);
 
   return (
     <div className="min-h-screen bg-zinc-50 py-16 px-8">

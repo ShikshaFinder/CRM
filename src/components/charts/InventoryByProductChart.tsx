@@ -40,11 +40,17 @@ export function InventoryByProductChart() {
 
     async function load() {
       try {
-        const res = await fetch("/api/inventory")
+        const res = await fetch("/api/inventory", {
+          credentials: 'include',
+        })
         if (!res.ok) {
-          throw new Error(`Request failed: ${res.status}`)
+          const errorData = await res.json().catch(() => ({}))
+          throw new Error(errorData.error || `Request failed: ${res.status}`)
         }
         const json = (await res.json()) as InventoryStock[]
+        if (!Array.isArray(json)) {
+          throw new Error("Invalid response format")
+        }
 
         const byProduct = new Map<string, number>()
         for (const s of json) {
@@ -64,7 +70,7 @@ export function InventoryByProductChart() {
         }
       } catch (err: any) {
         if (!cancelled) {
-          setError("Failed to load inventory summary")
+          setError(err.message || "Failed to load inventory summary")
           // eslint-disable-next-line no-console
           console.error(err)
         }

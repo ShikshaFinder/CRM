@@ -35,11 +35,17 @@ export function OrdersByStageChart() {
 
     async function load() {
       try {
-        const res = await fetch("/api/orders")
+        const res = await fetch("/api/orders", {
+          credentials: 'include',
+        })
         if (!res.ok) {
-          throw new Error(`Request failed: ${res.status}`)
+          const errorData = await res.json().catch(() => ({}))
+          throw new Error(errorData.error || `Request failed: ${res.status}`)
         }
         const json = (await res.json()) as Order[]
+        if (!Array.isArray(json)) {
+          throw new Error("Invalid response format")
+        }
 
         const byStage = new Map<string, number>()
         for (const order of json) {
@@ -60,7 +66,7 @@ export function OrdersByStageChart() {
         }
       } catch (err: any) {
         if (!cancelled) {
-          setError("Failed to load orders summary")
+          setError(err.message || "Failed to load orders summary")
           // eslint-disable-next-line no-console
           console.error(err)
         }

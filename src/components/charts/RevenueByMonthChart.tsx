@@ -29,17 +29,20 @@ export function RevenueByMonthChart() {
 
     async function load() {
       try {
-        const res = await fetch("/api/analytics/sales-summary")
+        const res = await fetch("/api/analytics/sales-summary", {
+          credentials: 'include',
+        })
         if (!res.ok) {
-          throw new Error(`Request failed: ${res.status}`)
+          const errorData = await res.json().catch(() => ({}))
+          throw new Error(errorData.error || `Request failed: ${res.status}`)
         }
         const json = (await res.json()) as SalesSummaryRow[]
         if (!cancelled) {
-          setData(json)
+          setData(Array.isArray(json) ? json : [])
         }
       } catch (err: any) {
         if (!cancelled) {
-          setError("Failed to load revenue data")
+          setError(err.message || "Failed to load revenue data")
           // eslint-disable-next-line no-console
           console.error(err)
         }

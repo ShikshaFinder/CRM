@@ -29,14 +29,24 @@ export default function HRPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/hr/employees')
-      .then((res) => res.json())
+    fetch('/api/hr/employees', {
+      credentials: 'include',
+    })
+      .then((res) => {
+        if (!res.ok) {
+          return res.json().then((errorData) => {
+            throw new Error(errorData.error || `Request failed: ${res.status}`);
+          });
+        }
+        return res.json();
+      })
       .then((data) => {
-        setEmployees(data);
+        setEmployees(Array.isArray(data) ? data : []);
         setLoading(false);
       })
       .catch((err) => {
-        setError('Failed to load employees');
+        setError(err.message || 'Failed to load employees');
+        setEmployees([]);
         setLoading(false);
       });
   }, []);

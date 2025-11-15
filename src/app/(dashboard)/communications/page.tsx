@@ -41,14 +41,27 @@ export default function CommunicationsPage() {
   const [activeTab, setActiveTab] = useState<'notifications' | 'tickets'>('notifications');
 
   useEffect(() => {
-    fetch('/api/communications')
-      .then((res) => res.json())
+    fetch('/api/communications', {
+      credentials: 'include',
+    })
+      .then((res) => {
+        if (!res.ok) {
+          return res.json().then((errorData) => {
+            throw new Error(errorData.error || `Request failed: ${res.status}`);
+          });
+        }
+        return res.json();
+      })
       .then((data) => {
-        setData(data);
+        setData({
+          notifications: Array.isArray(data.notifications) ? data.notifications : [],
+          tickets: Array.isArray(data.tickets) ? data.tickets : [],
+        });
         setLoading(false);
       })
       .catch((err) => {
-        setError('Failed to load communications');
+        setError(err.message || 'Failed to load communications');
+        setData({ notifications: [], tickets: [] });
         setLoading(false);
       });
   }, []);
@@ -97,7 +110,7 @@ export default function CommunicationsPage() {
     );
   }
 
-  const unreadNotifications = data.notifications.filter(n => !n.read).length;
+  const unreadNotifications = (Array.isArray(data.notifications) ? data.notifications : []).filter(n => !n.read).length;
 
   return (
     <div className="min-h-screen bg-zinc-50 py-16 px-8">
@@ -226,7 +239,7 @@ export default function CommunicationsPage() {
                   </div>
                 </div>
 
-                {ticket.comments.length > 0 && (
+                {Array.isArray(ticket.comments) && ticket.comments.length > 0 && (
                   <div className="border-t border-zinc-200 pt-4">
                     <h4 className="text-sm font-medium text-zinc-600 mb-2">
                       Comments ({ticket.comments.length})

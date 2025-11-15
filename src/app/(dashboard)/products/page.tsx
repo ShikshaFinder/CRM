@@ -53,14 +53,24 @@ export default function ProductsPage() {
 
   const fetchProducts = () => {
     setLoading(true);
-    fetch('/api/products')
-      .then((res) => res.json())
+    fetch('/api/products', {
+      credentials: 'include',
+    })
+      .then((res) => {
+        if (!res.ok) {
+          return res.json().then((errorData) => {
+            throw new Error(errorData.error || `Request failed: ${res.status}`);
+          });
+        }
+        return res.json();
+      })
       .then((data) => {
-        setProducts(data);
+        setProducts(Array.isArray(data) ? data : []);
         setLoading(false);
       })
       .catch((err) => {
-        setError('Failed to load products');
+        setError(err.message || 'Failed to load products');
+        setProducts([]);
         setLoading(false);
       });
   };

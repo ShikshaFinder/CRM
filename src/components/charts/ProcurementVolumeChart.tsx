@@ -36,11 +36,17 @@ export function ProcurementVolumeChart() {
 
     async function load() {
       try {
-        const res = await fetch("/api/procurements")
+        const res = await fetch("/api/procurements", {
+          credentials: 'include',
+        })
         if (!res.ok) {
-          throw new Error(`Request failed: ${res.status}`)
+          const errorData = await res.json().catch(() => ({}))
+          throw new Error(errorData.error || `Request failed: ${res.status}`)
         }
         const json = (await res.json()) as ProcurementEntry[]
+        if (!Array.isArray(json)) {
+          throw new Error("Invalid response format")
+        }
 
         const byDay = new Map<string, number>()
         for (const entry of json) {
@@ -61,7 +67,7 @@ export function ProcurementVolumeChart() {
         }
       } catch (err: any) {
         if (!cancelled) {
-          setError("Failed to load procurement summary")
+          setError(err.message || "Failed to load procurement summary")
           // eslint-disable-next-line no-console
           console.error(err)
         }

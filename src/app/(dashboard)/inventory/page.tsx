@@ -32,14 +32,24 @@ export default function InventoryPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/inventory')
-      .then((res) => res.json())
+    fetch('/api/inventory', {
+      credentials: 'include',
+    })
+      .then((res) => {
+        if (!res.ok) {
+          return res.json().then((errorData) => {
+            throw new Error(errorData.error || `Request failed: ${res.status}`);
+          });
+        }
+        return res.json();
+      })
       .then((data) => {
-        setStocks(data);
+        setStocks(Array.isArray(data) ? data : []);
         setLoading(false);
       })
       .catch((err) => {
-        setError('Failed to load inventory');
+        setError(err.message || 'Failed to load inventory');
+        setStocks([]);
         setLoading(false);
       });
   }, []);
@@ -72,7 +82,7 @@ export default function InventoryPage() {
     );
   }
 
-  const totalQuantity = stocks.reduce((sum, stock) => sum + stock.quantity, 0);
+  const totalQuantity = stocks.reduce((sum, stock) => sum + (stock.quantity || 0), 0);
 
   return (
     <div className="min-h-screen bg-zinc-50 py-16 px-8">
@@ -134,18 +144,18 @@ export default function InventoryPage() {
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold text-black mb-1">
-                      {stock.product.name}
+                      {stock.product?.name || 'Unknown Product'}
                     </h3>
                     <p className="text-sm text-zinc-600">
-                      {stock.product.category}
+                      {stock.product?.category || 'N/A'}
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="text-2xl font-bold text-black">
-                      {stock.quantity}
+                      {stock.quantity || 0}
                     </p>
                     <p className="text-xs text-zinc-500">
-                      {stock.product.unit}
+                      {stock.product?.unit || ''}
                     </p>
                   </div>
                 </div>

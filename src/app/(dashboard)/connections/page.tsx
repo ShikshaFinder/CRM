@@ -30,14 +30,24 @@ export default function ConnectionsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/connections')
-      .then((res) => res.json())
+    fetch('/api/connections', {
+      credentials: 'include',
+    })
+      .then((res) => {
+        if (!res.ok) {
+          return res.json().then((errorData) => {
+            throw new Error(errorData.error || `Request failed: ${res.status}`);
+          });
+        }
+        return res.json();
+      })
       .then((data) => {
-        setConnections(data);
+        setConnections(Array.isArray(data) ? data : []);
         setLoading(false);
       })
       .catch((err) => {
-        setError('Failed to load connections');
+        setError(err.message || 'Failed to load connections');
+        setConnections([]);
         setLoading(false);
       });
   }, []);
@@ -143,7 +153,7 @@ export default function ConnectionsPage() {
                   </div>
                 )}
 
-                {connection.contacts.length > 0 && (
+                {Array.isArray(connection.contacts) && connection.contacts.length > 0 && (
                   <div className="mt-4 pt-4 border-t border-zinc-200">
                     <p className="text-xs text-zinc-600 mb-2">
                       Contacts ({connection.contacts.length})

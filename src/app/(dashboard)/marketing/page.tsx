@@ -19,14 +19,24 @@ export default function MarketingPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/marketing/campaigns')
-      .then((res) => res.json())
+    fetch('/api/marketing/campaigns', {
+      credentials: 'include',
+    })
+      .then((res) => {
+        if (!res.ok) {
+          return res.json().then((errorData) => {
+            throw new Error(errorData.error || `Request failed: ${res.status}`);
+          });
+        }
+        return res.json();
+      })
       .then((data) => {
-        setCampaigns(data);
+        setCampaigns(Array.isArray(data) ? data : []);
         setLoading(false);
       })
       .catch((err) => {
-        setError('Failed to load campaigns');
+        setError(err.message || 'Failed to load campaigns');
+        setCampaigns([]);
         setLoading(false);
       });
   }, []);

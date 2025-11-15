@@ -19,14 +19,24 @@ export default function CompliancePage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/compliance/documents')
-      .then((res) => res.json())
+    fetch('/api/compliance/documents', {
+      credentials: 'include',
+    })
+      .then((res) => {
+        if (!res.ok) {
+          return res.json().then((errorData) => {
+            throw new Error(errorData.error || `Request failed: ${res.status}`);
+          });
+        }
+        return res.json();
+      })
       .then((data) => {
-        setDocuments(data);
+        setDocuments(Array.isArray(data) ? data : []);
         setLoading(false);
       })
       .catch((err) => {
-        setError('Failed to load documents');
+        setError(err.message || 'Failed to load documents');
+        setDocuments([]);
         setLoading(false);
       });
   }, []);

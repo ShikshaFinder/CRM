@@ -30,20 +30,30 @@ export default function FinancePage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/finance/invoices')
-      .then((res) => res.json())
+    fetch('/api/finance/invoices', {
+      credentials: 'include',
+    })
+      .then((res) => {
+        if (!res.ok) {
+          return res.json().then((errorData) => {
+            throw new Error(errorData.error || `Request failed: ${res.status}`);
+          });
+        }
+        return res.json();
+      })
       .then((data) => {
-        setInvoices(data);
+        setInvoices(Array.isArray(data) ? data : []);
         setLoading(false);
       })
       .catch((err) => {
-        setError('Failed to load invoices');
+        setError(err.message || 'Failed to load invoices');
+        setInvoices([]);
         setLoading(false);
       });
   }, []);
 
   const getPaymentStatus = (invoice: Invoice) => {
-    const totalPaid = invoice.payments.reduce((sum, p) => sum + p.amount, 0);
+    const totalPaid = (Array.isArray(invoice.payments) ? invoice.payments : []).reduce((sum, p) => sum + (p.amount || 0), 0);
     const remaining = invoice.totalAmount - totalPaid;
     
     if (remaining <= 0) return { status: 'paid', amount: 0, color: 'bg-green-100 text-green-800' };
@@ -69,9 +79,9 @@ export default function FinancePage() {
     );
   }
 
-  const totalAmount = invoices.reduce((sum, inv) => sum + inv.totalAmount, 0);
+  const totalAmount = invoices.reduce((sum, inv) => sum + (inv.totalAmount || 0), 0);
   const totalPaid = invoices.reduce((sum, inv) => {
-    const paid = inv.payments.reduce((pSum, p) => pSum + p.amount, 0);
+    const paid = (Array.isArray(inv.payments) ? inv.payments : []).reduce((pSum, p) => pSum + (p.amount || 0), 0);
     return sum + paid;
   }, 0);
   const totalOutstanding = totalAmount - totalPaid;
@@ -139,7 +149,7 @@ export default function FinancePage() {
         <div className="space-y-6">
           {invoices.map((invoice, index) => {
             const paymentStatus = getPaymentStatus(invoice);
-            const totalPaid = invoice.payments.reduce((sum, p) => sum + p.amount, 0);
+            const totalPaid = (Array.isArray(invoice.payments) ? invoice.payments : []).reduce((sum, p) => sum + (p.amount || 0), 0);
             return (
               <motion.div
                 key={invoice.id}
@@ -198,7 +208,7 @@ export default function FinancePage() {
                   )}
                 </div>
 
-                {invoice.payments.length > 0 && (
+                {Array.isArray(invoice.payments) && invoice.payments.length > 0 && (
                   <div className="border-t border-zinc-200 pt-4">
                     <h4 className="text-sm font-medium text-zinc-600 mb-2">
                       Payments ({invoice.payments.length})

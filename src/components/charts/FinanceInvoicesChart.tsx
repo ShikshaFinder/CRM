@@ -40,11 +40,17 @@ export function FinanceInvoicesChart() {
 
     async function load() {
       try {
-        const res = await fetch("/api/finance/invoices")
+        const res = await fetch("/api/finance/invoices", {
+          credentials: 'include',
+        })
         if (!res.ok) {
-          throw new Error(`Request failed: ${res.status}`)
+          const errorData = await res.json().catch(() => ({}))
+          throw new Error(errorData.error || `Request failed: ${res.status}`)
         }
         const json = (await res.json()) as Invoice[]
+        if (!Array.isArray(json)) {
+          throw new Error("Invalid response format")
+        }
 
         const byMonth = new Map<string, { invoiced: number; paid: number }>()
 
@@ -76,7 +82,7 @@ export function FinanceInvoicesChart() {
         }
       } catch (err: any) {
         if (!cancelled) {
-          setError("Failed to load finance summary")
+          setError(err.message || "Failed to load finance summary")
           // eslint-disable-next-line no-console
           console.error(err)
         }

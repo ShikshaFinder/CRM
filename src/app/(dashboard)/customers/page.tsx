@@ -47,14 +47,24 @@ export default function CustomersPage() {
 
   const fetchCustomers = () => {
     setLoading(true);
-    fetch('/api/customers')
-      .then((res) => res.json())
+    fetch('/api/customers', {
+      credentials: 'include',
+    })
+      .then((res) => {
+        if (!res.ok) {
+          return res.json().then((errorData) => {
+            throw new Error(errorData.error || `Request failed: ${res.status}`);
+          });
+        }
+        return res.json();
+      })
       .then((data) => {
-        setCustomers(data);
+        setCustomers(Array.isArray(data) ? data : []);
         setLoading(false);
       })
       .catch((err) => {
-        setError('Failed to load customers');
+        setError(err.message || 'Failed to load customers');
+        setCustomers([]);
         setLoading(false);
       });
   };
@@ -209,10 +219,10 @@ export default function CustomersPage() {
 
                 <div className="mt-4 pt-4 border-t border-zinc-200">
                   <div className="flex justify-between text-xs text-zinc-600 mb-2">
-                    <span>Contacts: {customer.contacts.length}</span>
-                    <span>Orders: {customer.salesOrders.length}</span>
+                    <span>Contacts: {Array.isArray(customer.contacts) ? customer.contacts.length : 0}</span>
+                    <span>Orders: {Array.isArray(customer.salesOrders) ? customer.salesOrders.length : 0}</span>
                   </div>
-                  {customer.contacts.length > 0 && (
+                  {Array.isArray(customer.contacts) && customer.contacts.length > 0 && (
                     <div className="space-y-1">
                       {customer.contacts.slice(0, 2).map((contact) => (
                         <div key={contact.id} className="text-xs">

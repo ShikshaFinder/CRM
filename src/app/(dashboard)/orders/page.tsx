@@ -35,14 +35,24 @@ export default function OrdersPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/orders')
-      .then((res) => res.json())
+    fetch('/api/orders', {
+      credentials: 'include',
+    })
+      .then((res) => {
+        if (!res.ok) {
+          return res.json().then((errorData) => {
+            throw new Error(errorData.error || `Request failed: ${res.status}`);
+          });
+        }
+        return res.json();
+      })
       .then((data) => {
-        setOrders(data);
+        setOrders(Array.isArray(data) ? data : []);
         setLoading(false);
       })
       .catch((err) => {
-        setError('Failed to load orders');
+        setError(err.message || 'Failed to load orders');
+        setOrders([]);
         setLoading(false);
       });
   }, []);
@@ -113,7 +123,7 @@ export default function OrdersPage() {
 
         <div className="space-y-6">
           {orders.map((order, index) => {
-            const totalAmount = order.items.reduce((sum, item) => sum + item.qty * item.price, 0);
+            const totalAmount = (Array.isArray(order.items) ? order.items : []).reduce((sum, item) => sum + (item.qty || 0) * (item.price || 0), 0);
             return (
               <motion.div
                 key={order.id}
@@ -167,16 +177,16 @@ export default function OrdersPage() {
 
                 <div className="border-t border-zinc-200 pt-4">
                   <h4 className="text-sm font-medium text-zinc-600 mb-2">
-                    Items ({order.items.length})
+                    Items ({Array.isArray(order.items) ? order.items.length : 0})
                   </h4>
                   <div className="space-y-2">
-                    {order.items.map((item) => (
+                    {(Array.isArray(order.items) ? order.items : []).map((item) => (
                       <div key={item.id} className="flex justify-between items-center text-sm">
                         <span className="text-zinc-700">
-                          {item.product.name} × {item.qty}
+                          {item.product?.name || 'Unknown'} × {item.qty || 0}
                         </span>
                         <span className="text-black font-medium">
-                          ₹{(item.qty * item.price).toFixed(2)}
+                          ₹{((item.qty || 0) * (item.price || 0)).toFixed(2)}
                         </span>
                       </div>
                     ))}
