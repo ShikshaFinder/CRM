@@ -56,7 +56,7 @@ function VerifyEmailInner() {
       setMessage(
         "Email verified successfully! Your account has been activated."
       );
-      setTimeout(() => router.push("/api/auth/signin"), 3000);
+      setTimeout(() => router.push("/authPages/signin"), 3000);
     } catch {
       setStatus("error");
       setMessage("An error occurred during verification. Please try again.");
@@ -100,21 +100,21 @@ function VerifyEmailInner() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 flex items-center justify-center py-16 px-8">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-16 px-8">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        <div className="bg-white rounded-lg p-8 shadow-sm border border-black/8 text-center space-y-6">
+        <div className="bg-white rounded-lg p-8 shadow-sm border border-gray-300 text-center space-y-6">
           {status === "loading" && (
             <>
-              <div className="w-16 h-16 border-4 border-black border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <h1 className="text-2xl font-semibold text-black mb-2">
+              <div className="w-16 h-16 border-4 border-gray-900 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <h1 className="text-2xl font-semibold text-gray-900 mb-2">
                 Verifying Email
               </h1>
-              <p className="text-zinc-600">{message}</p>
+              <p className="text-gray-600">{message}</p>
             </>
           )}
 
@@ -143,8 +143,8 @@ function VerifyEmailInner() {
               <h1 className="text-2xl font-semibold text-black mb-2">
                 Email Verified!
               </h1>
-              <p className="text-zinc-600 mb-6">{message}</p>
-              <p className="text-sm text-zinc-500">
+              <p className="text-gray-600 mb-6">{message}</p>
+              <p className="text-sm text-gray-500">
                 Redirecting to sign in...
               </p>
             </>
@@ -175,9 +175,9 @@ function VerifyEmailInner() {
               <h1 className="text-2xl font-semibold text-black mb-2">
                 Check Your Inbox
               </h1>
-              <p className="text-zinc-600 mb-4">{message}</p>
-              <p className="text-sm text-zinc-500">
-                Didn’t get it? Request a new link below. Be sure to check spam/updates folders too.
+              <p className="text-gray-600 mb-4">{message}</p>
+              <p className="text-sm text-gray-500">
+                Didn't get it? Request a new link below. Be sure to check spam/updates folders too.
               </p>
             </>
           )}
@@ -204,16 +204,16 @@ function VerifyEmailInner() {
                   />
                 </svg>
               </motion.div>
-              <h1 className="text-2xl font-semibold text-black mb-2">
+              <h1 className="text-2xl font-semibold text-gray-900 mb-2">
                 Verification Failed
               </h1>
-              <p className="text-zinc-600 mb-6">{message}</p>
+              <p className="text-gray-600 mb-6">{message}</p>
             </>
           )}
 
           <div className="text-left space-y-4">
             <div>
-              <label className="block text-sm font-medium text-black mb-1" htmlFor="resend-email">
+              <label className="block text-sm font-medium text-gray-900 mb-1" htmlFor="resend-email">
                 Need a new link?
               </label>
               <input
@@ -228,12 +228,12 @@ function VerifyEmailInner() {
                     setResendMessage(null);
                   }
                 }}
-                className="w-full px-4 py-2 border border-black/8 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
               />
             </div>
             <button
               onClick={handleResendEmail}
-              className="w-full py-3 bg-black text-white rounded-lg font-medium hover:bg-zinc-800 transition-colors"
+              className="w-full py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={resendStatus === "loading"}
             >
               {resendStatus === "loading" ? "Sending..." : "Send verification email"}
@@ -241,14 +241,14 @@ function VerifyEmailInner() {
             {resendMessage && (
               <p
                 className={`text-sm ${
-                  resendStatus === "error" ? "text-red-600" : "text-zinc-600"
+                  resendStatus === "error" ? "text-red-600" : "text-gray-600"
                 }`}
               >
                 {resendMessage}
               </p>
             )}
-            <p className="text-center text-sm text-zinc-500">
-              <a href="/signup" className="text-black font-medium hover:underline">
+            <p className="text-center text-sm text-gray-500">
+              <a href="/authPages/signup" className="text-gray-900 font-medium hover:underline">
                 Back to Sign Up
               </a>
             </p>

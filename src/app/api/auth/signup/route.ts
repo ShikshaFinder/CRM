@@ -209,102 +209,100 @@ export async function POST(req: Request) {
       organization = invite.organization;
 
       // 🔹 Create user without organization (will join after verification)
-      result = await prisma.$transaction(async (tx) => {
-        const user = await tx.user.create({
-          data: {
-            email: normalizedEmail,
-            password: hashedPassword,
-            isActive: 0,
-            emailVerified: 0,
-            createdAt: currentTime,
-            updatedAt: currentTime,
-            profile: {
-              create: {
-                fullName: fullName || undefined,
-                phone: phone || undefined,
-              },
+      // Note: D1 doesn't support interactive transactions, so we use sequential operations
+      const user = await prisma.user.create({
+        data: {
+          email: normalizedEmail,
+          password: hashedPassword,
+          isActive: 0,
+          emailVerified: 0,
+          createdAt: currentTime,
+          updatedAt: currentTime,
+          profile: {
+            create: {
+              fullName: fullName || undefined,
+              phone: phone || undefined,
             },
           },
-          include: {
-            profile: true,
-          },
-        });
-
-        await tx.verificationToken.create({
-          data: {
-            token,
-            userId: user.id,
-            expiresAt,
-          },
-        });
-
-        return { user, inviteId: invite.id, organizationId: invite.organizationId };
+        },
+        include: {
+          profile: true,
+        },
       });
+
+      await prisma.verificationToken.create({
+        data: {
+          token,
+          userId: user.id,
+          expiresAt,
+        },
+      });
+
+      result = { user, inviteId: invite.id, organizationId: invite.organizationId };
     } else {
       // 🔹 Create flow: Create user + organization
+      // Note: D1 doesn't support interactive transactions, so we use sequential operations
       const orgSlug = await generateUniqueSlug(organizationName);
       const orgCode = await generateUniqueOrgCode();
 
-      result = await prisma.$transaction(async (tx) => {
-        const user = await tx.user.create({
-          data: {
-            email: normalizedEmail,
-            password: hashedPassword,
-            isActive: 0,
-            emailVerified: 0,
-            createdAt: currentTime,
-            updatedAt: currentTime,
-            profile: {
-              create: {
-                fullName: fullName || undefined,
-                phone: phone || undefined,
-              },
+      const user = await prisma.user.create({
+        data: {
+          email: normalizedEmail,
+          password: hashedPassword,
+          isActive: 0,
+          emailVerified: 0,
+          createdAt: currentTime,
+          updatedAt: currentTime,
+          profile: {
+            create: {
+              fullName: fullName || undefined,
+              phone: phone || undefined,
             },
           },
-          include: {
-            profile: true,
-          },
-        });
-
-        const newOrganization = await tx.organization.create({
-          data: {
-            name: organizationName.trim(),
-            slug: orgSlug,
-            code: orgCode,
-            ownerId: user.id,
-            createdAt: currentTime,
-            updatedAt: currentTime,
-          },
-        });
-
-        const updatedUser = await tx.user.update({
-          where: { id: user.id },
-          data: {
-            defaultOrganizationId: newOrganization.id,
-          },
-          include: {
-            profile: true,
-          },
-        });
-
-        await tx.organizationMembership.create({
-          data: {
-            userId: user.id,
-            organizationId: newOrganization.id,
-            role: ORG_ROLE_ADMIN,
-          },
-        });
-
-        await tx.verificationToken.create({
-          data: {
-            token,
-            userId: user.id,
-            expiresAt,
-          },
-        });
-
-        return { user: updatedUser, organization: newOrganization };
+        },
+        include: {
+          profile: true,
+        },
       });
+
+      const newOrganization = await prisma.organization.create({
+        data: {
+          name: organizationName.trim(),
+          slug: orgSlug,
+          code: orgCode,
+          ownerId: user.id,
+          createdAt: currentTime,
+          updatedAt: currentTime,
+        },
+      });
+
+      const updatedUser = await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          defaultOrganizationId: newOrganization.id,
+        },
+        include: {
+          profile: true,
+        },
+      });
+
+      await prisma.organizationMembership.create({
+        data: {
+          userId: user.id,
+          organizationId: newOrganization.id,
+          role: ORG_ROLE_ADMIN,
+        },
+      });
+
+      await prisma.verificationToken.create({
+        data: {
+          token,
+          userId: user.id,
+          expiresAt,
+        },
+      });
+
+      result = { user: updatedUser, organization: newOrganization };
 
       organization = result.organization;
     }

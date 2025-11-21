@@ -3,6 +3,15 @@ import { NextResponse } from "next/server";
 
 export default withAuth(
   function middleware(req) {
+    const { pathname } = req.nextUrl;
+    
+    // Redirect /verify-email to /authPages/verify-email
+    if (pathname === "/verify-email" || pathname.startsWith("/verify-email?")) {
+      const url = req.nextUrl.clone();
+      url.pathname = "/authPages/verify-email";
+      return NextResponse.redirect(url);
+    }
+    
     // Add any additional middleware logic here
     return NextResponse.next();
   },
