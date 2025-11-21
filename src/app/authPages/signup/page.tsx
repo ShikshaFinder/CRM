@@ -99,18 +99,18 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 flex items-center justify-center py-16 px-8">
+    <div className="min-h-screen bg-white flex items-center justify-center py-16 px-8">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        <div className="bg-white rounded-lg p-8 shadow-sm border border-black/8">
+        <div className="bg-white rounded-lg p-8 shadow-sm border border-gray-200">
           <h1 className="text-3xl font-semibold text-black mb-2">
             Create Account
           </h1>
-          <p className="text-zinc-600 mb-6">
+          <p className="text-gray-600 mb-6">
             Sign up to get started
           </p>
 
@@ -129,7 +129,7 @@ export default function SignupPage() {
                 className={`px-4 py-3 rounded-lg border-2 font-medium transition-colors ${
                   signupType === 'create'
                     ? 'border-black bg-black text-white'
-                    : 'border-black/8 bg-white text-black hover:bg-zinc-50'
+                    : 'border-gray-300 bg-white text-black hover:bg-gray-50'
                 }`}
               >
                 Create Organization
@@ -143,7 +143,7 @@ export default function SignupPage() {
                 className={`px-4 py-3 rounded-lg border-2 font-medium transition-colors ${
                   signupType === 'join'
                     ? 'border-black bg-black text-white'
-                    : 'border-black/8 bg-white text-black hover:bg-zinc-50'
+                    : 'border-gray-300 bg-white text-black hover:bg-gray-50'
                 }`}
               >
                 Join Organization
@@ -174,7 +174,7 @@ export default function SignupPage() {
                   ? ' Please confirm your email to activate your workspace.'
                   : ' Please confirm your email to join the organization.'}
               </p>
-              <ul className="mt-3 space-y-1 text-zinc-700">
+              <ul className="mt-3 space-y-1 text-gray-700">
                 <li className="flex items-start gap-2">
                   <span className="mt-1 h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
                   Check your inbox and click <strong>“Verify email”</strong>.
@@ -191,7 +191,7 @@ export default function SignupPage() {
               {verifyEmailLink && (
                 <a
                   href={verifyEmailLink}
-                  className="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
+                  className="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
                 >
                   Go to Verify Email
                 </a>
@@ -217,7 +217,7 @@ export default function SignupPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, organizationName: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-black/8 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
                   placeholder="Enter your organization name"
                 />
               </div>
@@ -238,10 +238,10 @@ export default function SignupPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, inviteCode: e.target.value.trim().toUpperCase() })
                     }
-                    className="w-full px-4 py-2 border border-black/8 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black font-mono"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black font-mono"
                     placeholder="Enter invite code"
                   />
-                  <p className="mt-1 text-xs text-zinc-500">
+                  <p className="mt-1 text-xs text-gray-500">
                     You received this code in your invitation email
                   </p>
                 </div>
@@ -260,11 +260,11 @@ export default function SignupPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, organizationCode: e.target.value.trim().toUpperCase() })
                     }
-                    className="w-full px-4 py-2 border border-black/8 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black font-mono"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black font-mono"
                     placeholder="Enter organization code"
                     maxLength={6}
                   />
-                  <p className="mt-1 text-xs text-zinc-500">
+                  <p className="mt-1 text-xs text-gray-500">
                     6-character code provided by your organization
                   </p>
                 </div>
@@ -285,7 +285,7 @@ export default function SignupPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, fullName: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-black/8 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
               />
             </div>
 
@@ -304,7 +304,7 @@ export default function SignupPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-black/8 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
               />
             </div>
 
@@ -322,7 +322,7 @@ export default function SignupPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, phone: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-black/8 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
               />
             </div>
 
@@ -341,7 +341,7 @@ export default function SignupPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, password: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-black/8 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
               />
             </div>
 
@@ -360,23 +360,23 @@ export default function SignupPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, confirmPassword: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-black/8 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-black text-white rounded-lg font-medium hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Creating Account...' : 'Sign Up'}
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-zinc-600">
+          <p className="mt-6 text-center text-sm text-gray-600">
             Already have an account?{' '}
             <a
-              href="/api/auth/signin"
+              href="/authPages/signin"
               className="text-black font-medium hover:underline"
             >
               Sign in

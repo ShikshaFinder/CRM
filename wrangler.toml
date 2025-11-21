@@ -10,5 +10,5 @@ command = "npm run db:generate && npm run build"
 
 [[d1_databases]]
 binding = "DB" # i.e. available in your Worker on env.DB
-database_name = "crm-1"
-database_id = "e400ca26-1e7f-48c7-add0-4cedd12ce4fc"
+database_name = "flavi-crm-next"
+database_id = "bdc3405b-6cf3-450b-9030-11c263c02cde"

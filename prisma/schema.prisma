@@ -1,14 +1,14 @@
 generator client {
   provider        = "prisma-client-js"
   output          = "../src/generated/prisma"
-  previewFeatures = ["driverAdapters"]
-  engineType      = "library"
+  previewFeatures = ["driverAdapters"] // Required for Cloudflare D1 adapter
+  engineType      = "library"          // Required for Cloudflare D1
   binaryTargets   = ["native"]
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"  // Cloudflare D1 uses SQLite
+  url      = env("DATABASE_URL") // Placeholder only - D1 doesn't use URLs, adapter handles connection via API
 }
 // NOTE: Cloudflare D1 (SQLite) does not support native enums or Json columns in Prisma.
 // To keep compatibility with D1, enum-like fields are modelled as String and

@@ -18,7 +18,13 @@ const prisma =
       CLOUDFLARE_DATABASE_ID: config.cloudflare.db_id,
     });
 
-    return new PrismaClient({ adapter } as any);
+    // When using Cloudflare D1 adapter, DATABASE_URL is just a placeholder for Prisma validation
+    // The actual connection is handled by the PrismaD1 adapter via Cloudflare API
+    // D1 doesn't use traditional database URLs - it connects via API
+    return new PrismaClient({
+      adapter,
+      datasourceUrl: process.env.DATABASE_URL || "file:./dev.db", // Placeholder - adapter handles real connection
+    });
   })();
 
 // Cache the instance globally in dev mode

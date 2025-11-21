@@ -48,18 +48,18 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 flex items-center justify-center py-16 px-8">
+    <div className="min-h-screen bg-white flex items-center justify-center py-16 px-8">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        <div className="bg-white rounded-lg p-8 shadow-sm border border-black/8">
+        <div className="bg-white rounded-lg p-8 shadow-sm border border-gray-200">
           <h1 className="text-3xl font-semibold text-black mb-2">
             Forgot Password
           </h1>
-          <p className="text-zinc-600 mb-6">
+          <p className="text-gray-600 mb-6">
             Enter your email address and we'll send you a link to reset your password.
           </p>
 
@@ -115,7 +115,7 @@ export default function ForgotPasswordPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-2 border border-black/8 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
                   placeholder="your@email.com"
                 />
               </div>
@@ -132,7 +132,7 @@ export default function ForgotPasswordPage() {
 
           <div className="mt-6 text-center">
             <Link
-              href="/signin"
+              href="/authPages/signin"
               className="text-sm text-black font-medium hover:underline"
             >
               Back to Sign In

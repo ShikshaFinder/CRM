@@ -12,9 +12,15 @@ export default withAuth(
         // Protect all routes except auth pages and public assets
         const { pathname } = req.nextUrl;
 
+        // Allow access to root landing page
+        if (pathname === "/") {
+          return true;
+        }
+
         // Allow access to auth pages
         if (
           pathname.startsWith("/api/auth") ||
+          pathname.startsWith("/authPages") ||
           pathname.startsWith("/signup") ||
           pathname.startsWith("/signin") ||
           pathname.startsWith("/verify-email") ||
@@ -31,7 +37,7 @@ export default withAuth(
       },
     },
     pages: {
-      signIn: "/api/auth/signin",
+      signIn: "/authPages/signin",
     },
   }
 );
