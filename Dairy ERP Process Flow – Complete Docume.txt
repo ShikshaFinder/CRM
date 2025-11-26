@@ -1,0 +1,292 @@
+Dairy ERP Process Flow – Complete Documentation
+1. Milk Arrival (Supplier → Plant Gate)
+• Supplier brings milk in cans/tankers.
+• Gate operator records:
+  - Supplier/Route name
+  - Vehicle number
+  - Time of arrival
+-add a field for adding challan/recipt
+• Supervisor verifies details.
+• ERP captures: Supplier ID, Route ID, Vehicle ID, Arrival Time, Approx Quantity.
+2. Primary Quality Testing (Platform Tests)
+Tests done:
+  - FAT
+  - SNF
+  - Acidity %
+  - Temperature
+  - Alcohol/Adulteration test
+  - COB test
+  - Organoleptic analysis
+Pass/Fail determines acceptance.
+ERP captures: FAT, SNF, LR, Temperature, Water %, Adulteration result, Pass/Reject.
+3. Milk Unloading & Weighing
+
+
+• Unloaded into dump tank/silos.
+• ERP records exact weight, supplier ID, quality score.
+• Finance auto-calculates payment based on FAT-SNF.
+4. Milk Chilling & Storage
+• Milk chilled to 4°C.
+• Stored in milk silos with agitators.
+• ERP logs:
+  - Silo number
+  - Inlet time
+  - Temperature logs
+  - Volume
+-AGitation run time boolean (is running or not)
+• Maintenance monitors chilling plant & compressor.
+5. Cream Separation & Standardization
+• Milk sent to cream separator.
+• FAT adjusted to create:
+  - Toned
+  - Standardized
+  - Full cream
+  - Skimmed milk
+• ERP logs:
+  - FAT before/after
+  - Machine runtime
+  - Standardization formula
+  - Loss calculation
+6. Pasteurization & Homogenization
+Pasteurization: 72°C for 15 sec → 4°C cooling.
+Homogenization: Fat globules evenly dispersed.(optional)
+ERP logs:
+  - Temperature chart
+  - Holding time
+  - Pressure logs(optional)
+  - Batch number
+Auto alerts for deviation.
+7. Product Manufacturing (Curd, Ghee, Paneer, etc.)
+Curd Process:
+  1. Heat treatment
+  2. Culture inoculation
+  3. Incubation
+  4. Breaking curd
+  5. Filling
+
+Paneer Process:
+  1. Coagulation
+  2. Pressing
+  3. Cutting
+  4. Packaging
+
+Butter/Ghee:
+  • Cream → Butter → Ghee heating
+
+ERP logs: Batch, process parameters, yields.
+8. Packaging
+• Milk pouch filling
+• Curd cup filling
+• Bottle filling
+ERP tracks:
+  - Line number
+  - Output
+  - Rejected packs
+  - Material usage
+Maintenance tracks machine health.
+9. Storage & Dispatch
+• Products stored in cold room.
+• Sales creates dispatch plan (route-wise).
+• ERP tracks:
+  - Batch-wise stock
+  - FIFO
+  - Delivery orders
+  - Distributor mapping.
+10. Finance Integration
+Supplier side:
+  - Milk payment (FAT-SNF)
+  - Incentives(optional)
+
+Sales side:
+  - Dealer payment
+  - Invoice generation
+ERP provides full financial visibility.
+11. HR Integration
+• Shift allocation
+• Attendance
+• Duty logs
+• Performance reports
+• Training compliance.
+12. R&D Integration
+• New product trials
+• Culture-temperature experiments
+• Cost optimization
+• Shelf-life testing
+13. Management Dashboard
+• Milk collection trends
+• Quality trends
+• Production output
+• Sales & revenue
+• Machine downtime
+• HR performance
+• Inventory status
+• Profitability
+
+
+
+Role-wise Data Visibility for Dairy ERP
+1. Operator
+What They See:
+- Milk arrivals for the day
+- Pending quality tests
+- Silo capacities & current level
+- Machine running status
+- Assigned tasks
+What They Can Enter:
+- Milk arrival data
+- Platform test values (FAT, SNF, LR)
+- Weighbridge entries
+- Milk transfer to pasteurizer
+- Standardization values
+- Production output
+- Packaging output
+- Maintenance tickets
+What They Cannot See:
+- Finance data
+- HR data
+- Supplier payments
+- Sales data
+2. Supervisor
+What They See:
+- Milk status with quality
+- Unloading progress
+- Production status
+- Packaging line speed
+- Operator attendance
+What They Can Enter:
+- Approve/reject operator entries
+- Approve tests and batches
+- Assign tasks
+- View downtime logs
+What They Cannot See:
+- Supplier payments
+- Salary data
+- Profitability numbers
+3. Quality Tester
+What They See:
+- Milk lots pending testing
+- FAT & SNF trends
+- Batch quality status
+- Product test statuses
+- Quality alerts
+What They Can Enter:
+- Milk quality values
+- Adulteration test results
+- Product QA test results
+- Batch approvals
+What They Cannot See:
+- Maintenance data
+- HR data
+- Sales data
+- Finance data
+4. Production Department
+What They See:
+- Silo stock
+- Machine status
+- Batch progress
+- Standardization requirements
+- Daily production plan
+What They Can Enter:
+- Separator readings
+- Pasteurizer temp/time
+- Homogenizer pressure
+- Batch start/end
+- Product yield
+What They Cannot See:
+- Sales orders
+- Finance
+- Payroll
+5. Maintenance Department
+What They See:
+- Breakdown tickets
+- Preventive maintenance schedule
+- Machine run hours
+- Spare parts list
+- Chiller/compressor logs
+What They Can Enter:
+- Breakdown updates
+- PM logs
+- Parts used
+- Downtime reasons
+What They Cannot See:
+- Supplier data
+- Salaries
+- Revenue
+6. Sales Department
+What They See:
+- Stock for dispatch
+- Order list
+- Pending deliveries
+- Customer outstanding
+- Cold room stock
+What They Can Enter:
+- Customer orders
+- Dispatch planning
+- Invoices
+- Market returns
+What They Cannot See:
+- Supplier milk quality
+- Production logs
+- HR data
+- Maintenance
+7. Finance Department
+What They See:
+- Milk payment sheet
+- Invoice dues
+- Procurement cost
+- Sales vs expenses
+What They Can Enter:
+- Supplier milk payments
+- Purchase ledger
+- Sales ledger
+- Expenses
+What They Cannot See:
+- QC data
+- Maintenance logs
+- HR training info
+8. HR Department
+What They See:
+- Attendance
+- Shift planning
+- Leave requests
+- Performance metrics
+What They Can Enter:
+- Employee data
+- Shift assignments
+- Payroll
+- Appraisals
+What They Cannot See:
+- Finance details
+- Supplier payments
+- Sales invoices
+9. R&D
+What They See:
+- Trial batches
+- Shelf-life tests
+- Cost calculations
+- Culture/sugar usage
+What They Can Enter:
+- Product formulas
+- Trial results
+- Shelf-life logs
+What They Cannot See:
+- Finance
+- Sales
+- HR data
+10. Management
+What They See:
+- Procurement trends
+- Production analytics
+- Quality trends
+- Maintenance downtime
+- Finance analytics
+- Sales performance
+- HR insights
+What They Can Enter:
+- Full system oversight
+- Policy-level decisions
+What They Cannot See:
+- — (sees everything)
+
+
+include all details  

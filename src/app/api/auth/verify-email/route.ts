@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "../../../../lib/prisma";
+import type { Organization } from "@/generated/prisma";
 
 export async function GET(req: Request) {
   try {
@@ -50,69 +51,68 @@ export async function GET(req: Request) {
     });
 
     // Verify user email and activate account, and handle organization join
-    const result = await prisma.$transaction(async (tx) => {
-      const user = await tx.user.update({
-        where: { id: verificationToken.userId },
-        data: {
-          emailVerified: 1,
-          isActive: 1,
+    // Note: D1 doesn't support interactive transactions, so we use sequential operations
+    const user = await prisma.user.update({
+      where: { id: verificationToken.userId },
+      data: {
+        emailVerified: 1,
+        isActive: 1,
+      },
+    });
+
+    let joinedOrganization: Organization | null = null;
+
+    // If there's a pending invite, join the organization
+    if (pendingInvite && pendingInvite.organization && new Date() <= pendingInvite.expiresAt) {
+      // Check if user is already a member
+      const existingMembership = await prisma.organizationMembership.findUnique({
+        where: {
+          userId_organizationId: {
+            userId: user.id,
+            organizationId: pendingInvite.organizationId,
+          },
         },
       });
 
-      let joinedOrganization = null;
-
-      // If there's a pending invite, join the organization
-      if (pendingInvite && new Date() <= pendingInvite.expiresAt) {
-        // Check if user is already a member
-        const existingMembership = await tx.organizationMembership.findUnique({
-          where: {
-            userId_organizationId: {
-              userId: user.id,
-              organizationId: pendingInvite.organizationId,
-            },
+      if (!existingMembership) {
+        // Create membership
+        await prisma.organizationMembership.create({
+          data: {
+            userId: user.id,
+            organizationId: pendingInvite.organizationId,
+            role: pendingInvite.role,
           },
         });
 
-        if (!existingMembership) {
-          // Create membership
-          await tx.organizationMembership.create({
+        // Set as default organization if user doesn't have one
+        if (!user.defaultOrganizationId) {
+          await prisma.user.update({
+            where: { id: user.id },
             data: {
-              userId: user.id,
-              organizationId: pendingInvite.organizationId,
-              role: pendingInvite.role,
+              defaultOrganizationId: pendingInvite.organizationId,
             },
           });
-
-          // Set as default organization if user doesn't have one
-          if (!user.defaultOrganizationId) {
-            await tx.user.update({
-              where: { id: user.id },
-              data: {
-                defaultOrganizationId: pendingInvite.organizationId,
-              },
-            });
-          }
-
-          // Mark invite as accepted
-          await tx.organizationInvite.update({
-            where: { id: pendingInvite.id },
-            data: {
-              status: "ACCEPTED",
-              updatedAt: Math.floor(Date.now() / 1000),
-            },
-          });
-
-          joinedOrganization = pendingInvite.organization;
         }
+
+        // Mark invite as accepted
+        await prisma.organizationInvite.update({
+          where: { id: pendingInvite.id },
+          data: {
+            status: "ACCEPTED",
+            updatedAt: Math.floor(Date.now() / 1000),
+          },
+        });
+
+        joinedOrganization = pendingInvite.organization;
       }
+    }
 
-      // Delete used verification token
-      await tx.verificationToken.delete({
-        where: { token },
-      });
-
-      return { user, joinedOrganization };
+    // Delete used verification token
+    await prisma.verificationToken.delete({
+      where: { token },
     });
+
+    const result = { user, joinedOrganization };
 
     const message = result.joinedOrganization
       ? `Email verified successfully. You have been added to ${result.joinedOrganization.name}.`
@@ -184,69 +184,68 @@ export async function POST(req: Request) {
     });
 
     // Verify user email and activate account, and handle organization join
-    const result = await prisma.$transaction(async (tx) => {
-      const user = await tx.user.update({
-        where: { id: verificationToken.userId },
-        data: {
-          emailVerified: 1,
-          isActive: 1,
+    // Note: D1 doesn't support interactive transactions, so we use sequential operations
+    const user = await prisma.user.update({
+      where: { id: verificationToken.userId },
+      data: {
+        emailVerified: 1,
+        isActive: 1,
+      },
+    });
+
+    let joinedOrganization: Organization | null = null;
+
+    // If there's a pending invite, join the organization
+    if (pendingInvite && pendingInvite.organization && new Date() <= pendingInvite.expiresAt) {
+      // Check if user is already a member
+      const existingMembership = await prisma.organizationMembership.findUnique({
+        where: {
+          userId_organizationId: {
+            userId: user.id,
+            organizationId: pendingInvite.organizationId,
+          },
         },
       });
 
-      let joinedOrganization = null;
-
-      // If there's a pending invite, join the organization
-      if (pendingInvite && new Date() <= pendingInvite.expiresAt) {
-        // Check if user is already a member
-        const existingMembership = await tx.organizationMembership.findUnique({
-          where: {
-            userId_organizationId: {
-              userId: user.id,
-              organizationId: pendingInvite.organizationId,
-            },
+      if (!existingMembership) {
+        // Create membership
+        await prisma.organizationMembership.create({
+          data: {
+            userId: user.id,
+            organizationId: pendingInvite.organizationId,
+            role: pendingInvite.role,
           },
         });
 
-        if (!existingMembership) {
-          // Create membership
-          await tx.organizationMembership.create({
+        // Set as default organization if user doesn't have one
+        if (!user.defaultOrganizationId) {
+          await prisma.user.update({
+            where: { id: user.id },
             data: {
-              userId: user.id,
-              organizationId: pendingInvite.organizationId,
-              role: pendingInvite.role,
+              defaultOrganizationId: pendingInvite.organizationId,
             },
           });
-
-          // Set as default organization if user doesn't have one
-          if (!user.defaultOrganizationId) {
-            await tx.user.update({
-              where: { id: user.id },
-              data: {
-                defaultOrganizationId: pendingInvite.organizationId,
-              },
-            });
-          }
-
-          // Mark invite as accepted
-          await tx.organizationInvite.update({
-            where: { id: pendingInvite.id },
-            data: {
-              status: "ACCEPTED",
-              updatedAt: Math.floor(Date.now() / 1000),
-            },
-          });
-
-          joinedOrganization = pendingInvite.organization;
         }
+
+        // Mark invite as accepted
+        await prisma.organizationInvite.update({
+          where: { id: pendingInvite.id },
+          data: {
+            status: "ACCEPTED",
+            updatedAt: Math.floor(Date.now() / 1000),
+          },
+        });
+
+        joinedOrganization = pendingInvite.organization;
       }
+    }
 
-      // Delete used verification token
-      await tx.verificationToken.delete({
-        where: { token },
-      });
-
-      return { user, joinedOrganization };
+    // Delete used verification token
+    await prisma.verificationToken.delete({
+      where: { token },
     });
+
+    const result = { user, joinedOrganization };
 
     const message = result.joinedOrganization
       ? `Email verified successfully. You have been added to ${result.joinedOrganization.name}.`

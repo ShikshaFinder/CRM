@@ -17,6 +17,7 @@ const navItems: NavItem[] = [
   { name: 'Products', href: '/products', icon: '📦' },
   { name: 'Milk Procurement', href: '/procurements', icon: '🥛' },
   { name: 'Production', href: '/production', icon: '🏭' },
+  { name: 'Packaging', href: '/packaging', icon: '📦' },
   { name: 'Sales', href: '/orders', icon: '👜' },
   { name: 'Inventory', href: '/inventory', icon: '🛒' },
   { name: 'Delivery', href: '/delivery', icon: '🚚' },

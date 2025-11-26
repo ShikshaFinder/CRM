@@ -46,6 +46,8 @@ model User {
   verificationTokens    VerificationToken[]
   magicLinkTokens       MagicLinkToken[] @relation("MagicLinkTokens")
   invitationsSent       OrganizationInvite[] @relation("InvitedBy")
+  productionStageLogs   ProductionStageLog[]
+  packagingRuns         PackagingRun[]
 }
 
 model Organization {
@@ -90,6 +92,12 @@ model Organization {
   commissionRules    CommissionRule[]
   auditLogs          AuditLog[]
   invites            OrganizationInvite[]
+  productionStageLogs ProductionStageLog[]
+  packagingLines     PackagingLine[]
+  packagingRuns      PackagingRun[]
+  packagingOutputs   PackagingOutput[]
+  processAlerts      ProcessAlert[]
+  machineTelemetries MachineTelemetry[]
 }
 
 model OrganizationMembership {
@@ -219,6 +227,7 @@ model Product {
   productionBatchesByProduct ProductionBatch[]
   quoteLineItems     QuoteLineItem[]
   salesInquiries     SalesInquiry[]
+  packagingOutputs   PackagingOutput[]
 }
 
 model ProductPriceHistory {
@@ -295,9 +304,29 @@ model ProductionBatch {
   manufacturingDate Int?                  // Unix timestamp
   expiryDate       Int?                   // Unix timestamp
   status           String   @default("IN_PRODUCTION") // e.g., "IN_PRODUCTION", "COMPLETED"
+  fatBefore        Float?                  // Float for Float
+  fatAfter         Float?                  // Float for Float
+  snfBefore        Float?                  // Float for Float
+  snfAfter         Float?                  // Float for Float
+  agitationRunning Int?    @default(0)     // Boolean as Int
+  machineRuntimeMinutes Int?
+  standardizationFormula String?
+  lossPercent      Float?                  // Float for Float
+  temperatureProfile String?              // JSON string for chart data
+  holdingTimeSec   Int?
+  homogenizationPressure Float?           // Float for Float
+  qualityStatus    String?  @default("PENDING")
+  siloId           String?
+  creamSeparatorId String?
+  pasteurizerId    String?
+  homogenizerId    String?
   items            ProductionBatchItem[]
   orderItems       OrderItem[]
   inventoryStocks  InventoryStock[]
+  stageLogs        ProductionStageLog[]
+  packagingRuns    PackagingRun[]
+  alerts           ProcessAlert[]
+  telemetry        MachineTelemetry[]
 }
 
 model ProductionBatchItem {
@@ -323,6 +352,112 @@ model QualityTest {
   parameters     String?    // JSON as String (serialize/deserialize in app)
   outcome        String     // e.g., "PASS", "FAIL", "CONDITIONAL"
   remarks        String?
+}
+
+model ProductionStageLog {
+  id             String            @id @default(uuid())
+  organizationId String
+  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  batchId        String
+  batch          ProductionBatch   @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  stageName      String
+  status         String            @default("PENDING") // e.g., PENDING, PASS, FAIL
+  parameters     String?           // JSON payload for FAT/SNF, temp, etc.
+  startedAt      Int?
+  completedAt    Int?
+  recordedById   String?
+  recordedBy     User?             @relation(fields: [recordedById], references: [id], onDelete: SetNull)
+  remarks        String?
+  alerts         ProcessAlert[]
+}
+
+model PackagingLine {
+  id                 String            @id @default(uuid())
+  organizationId     String
+  organization       Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name               String
+  lineType           String            // e.g., POUCH, CUP, BOTTLE
+  speedUnitsPerHour  Float?            // Float for Float
+  isActive           Int               @default(1) // Boolean as Int
+  isUnderMaintenance Int               @default(0) // Boolean as Int
+  maintenanceNotes   String?
+  lastMaintenanceAt  Int?
+  nextMaintenanceDue Int?
+  packagingRuns      PackagingRun[]
+  telemetry          MachineTelemetry[]
+}
+
+model PackagingRun {
+  id               String            @id @default(uuid())
+  organizationId   String
+  organization     Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  batchId          String
+  batch            ProductionBatch   @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  packagingLineId  String
+  packagingLine    PackagingLine     @relation(fields: [packagingLineId], references: [id], onDelete: Cascade)
+  operatorId       String?
+  operator         User?             @relation(fields: [operatorId], references: [id], onDelete: SetNull)
+  status           String            @default("PLANNED") // PLANNED, RUNNING, COMPLETED, STOPPED
+  startedAt        Int?
+  completedAt      Int?
+  plannedOutput    Float?            // Float for Float
+  actualOutput     Float?            // Float for Float
+  rejectsCount     Float?            // Float for Float
+  materialUsedKg   Float?            // Float for Float
+  outputs          PackagingOutput[]
+  alerts           ProcessAlert[]
+  inventoryTransactions InventoryTransaction[]
+}
+
+model PackagingOutput {
+  id              String          @id @default(uuid())
+  organizationId  String
+  organization    Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  packagingRunId  String
+  packagingRun    PackagingRun    @relation(fields: [packagingRunId], references: [id], onDelete: Cascade)
+  productId       String
+  product         Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  packType        String?
+  filledUnits     Float?          // Float for Float
+  rejectedUnits   Float?          // Float for Float
+  materialUsedKg  Float?          // Float for Float
+  materialBatch   String?
+  recordedAt      Int?            // Unix timestamp
+}
+
+model ProcessAlert {
+  id               String             @id @default(uuid())
+  organizationId   String
+  organization     Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  alertType        String
+  severity         String             // INFO, WARNING, CRITICAL
+  message          String
+  createdAt        Int                // Unix timestamp
+  acknowledged     Int                @default(0) // Boolean as Int
+  acknowledgedAt   Int?
+  batchId          String?
+  batch            ProductionBatch?   @relation(fields: [batchId], references: [id], onDelete: SetNull)
+  stageLogId       String?
+  stageLog         ProductionStageLog? @relation(fields: [stageLogId], references: [id], onDelete: SetNull)
+  packagingRunId   String?
+  packagingRun     PackagingRun?      @relation(fields: [packagingRunId], references: [id], onDelete: SetNull)
+}
+
+model MachineTelemetry {
+  id               String            @id @default(uuid())
+  organizationId   String
+  organization     Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  batchId          String?
+  batch            ProductionBatch?  @relation(fields: [batchId], references: [id], onDelete: SetNull)
+  packagingLineId  String?
+  packagingLine    PackagingLine?    @relation(fields: [packagingLineId], references: [id], onDelete: SetNull)
+  machineType      String            // e.g., SILO, CHILLER, SEPARATOR
+  machineId        String?
+  parameter        String            // e.g., TEMPERATURE, RUNTIME
+  value            Float?            // Float for Float
+  unit             String?
+  recordedAt       Int               // Unix timestamp
+  notes            String?
 }
 
 // Sales pipeline
@@ -494,6 +629,8 @@ model InventoryTransaction {
   qty              Float     // Float for Float
   referenceType    String?   // e.g., "SalesOrder", "ProductionBatch"
   referenceId      String?
+  packagingRunId   String?
+  packagingRun     PackagingRun? @relation(fields: [packagingRunId], references: [id], onDelete: SetNull)
   createdAt        Int      // Unix timestamp
 }
 

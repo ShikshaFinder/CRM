@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+
 // Helper function to get Unix timestamp
 const getUnixTimestamp = (date: Date): number =>
   Math.floor(date.getTime() / 1000);
@@ -16,7 +17,6 @@ const daysFromNow = (days: number): number => {
   date.setDate(date.getDate() + days);
   return getUnixTimestamp(date);
 };
-
 
 async function main() {
   console.log("🌱 Starting seed...");
@@ -61,9 +61,17 @@ async function main() {
   await prisma.connection.deleteMany();
   await prisma.userRole.deleteMany();
   await prisma.userProfile.deleteMany();
+  // Clean production telemetry tables
+  await prisma.processAlert.deleteMany();
+  await prisma.machineTelemetry.deleteMany();
+  await prisma.packagingOutput.deleteMany();
+  await prisma.packagingRun.deleteMany();
+  await prisma.packagingLine.deleteMany();
+  await prisma.productionStageLog.deleteMany();
   await prisma.user.deleteMany();
   await prisma.department.deleteMany();
   await prisma.role.deleteMany();
+  await prisma.organization.deleteMany();
 
   // 1. Create Roles
   console.log("👥 Creating roles...");
@@ -151,7 +159,7 @@ async function main() {
   const adminUser = await prisma.user.create({
     data: {
       email: "admin@dairyfresh.com",
-      password: "$2a$10$YourHashedPasswordHere", // Replace with actual bcrypt hash
+      password: "$2a$10$YourHashedPasswordHere",
       isActive: 1,
       emailVerified: 1,
       createdAt: daysAgo(180),
@@ -177,6 +185,22 @@ async function main() {
     },
   });
 
+  // 4. Create Organization (BEFORE Connections)
+  console.log("🏛️ Creating organization...");
+  const primaryOrg = await prisma.organization.create({
+    data: {
+      name: "Dairy Fresh Cooperative",
+      slug: `dairy-fresh-${Date.now()}`,
+      code: `ORG${Math.floor(Math.random() * 999999)
+        .toString()
+        .padStart(6, "0")}`,
+      ownerId: adminUser.id,
+      createdAt: daysAgo(200),
+      updatedAt: daysAgo(1),
+    },
+  });
+
+  // Continue creating remaining users
   const salesManager = await prisma.user.create({
     data: {
       email: "sales.manager@dairyfresh.com",
@@ -326,11 +350,12 @@ async function main() {
     },
   });
 
-  // 4. Create Connections (Suppliers and Customers)
+  // 5. Create Connections (Suppliers and Customers) - WITH organizationId
   console.log("🔗 Creating connections...");
 
   const supplier1 = await prisma.connection.create({
     data: {
+      organizationId: primaryOrg.id,
       name: "Green Valley Dairy Farm",
       type: "SUPPLIER",
       businessCategory: "DAIRY_FARM",
@@ -369,6 +394,7 @@ async function main() {
 
   const supplier2 = await prisma.connection.create({
     data: {
+      organizationId: primaryOrg.id,
       name: "Sunrise Milk Producers",
       type: "SUPPLIER",
       businessCategory: "DAIRY_FARM",
@@ -399,6 +425,7 @@ async function main() {
 
   const customer1 = await prisma.connection.create({
     data: {
+      organizationId: primaryOrg.id,
       name: "Metro Supermarkets Ltd",
       type: "CUSTOMER",
       businessCategory: "DISTRIBUTOR",
@@ -430,6 +457,7 @@ async function main() {
 
   const customer2 = await prisma.connection.create({
     data: {
+      organizationId: primaryOrg.id,
       name: "Fresh Mart Chain",
       type: "CUSTOMER",
       businessCategory: "DISTRIBUTOR",
@@ -453,6 +481,7 @@ async function main() {
 
   const customer3 = await prisma.connection.create({
     data: {
+      organizationId: primaryOrg.id,
       name: "Hotel Rajwada",
       type: "CUSTOMER",
       businessCategory: "HOTEL",
@@ -474,7 +503,7 @@ async function main() {
     },
   });
 
-  // 5. Create Milk Collection Centers
+  // 6. Create Milk Collection Centers
   console.log("🥛 Creating milk collection centers...");
   const center1 = await prisma.milkCollectionCenter.create({
     data: {
@@ -498,7 +527,7 @@ async function main() {
     },
   });
 
-  // 6. Create Milk Rate Chart
+  // 7. Create Milk Rate Chart
   console.log("💰 Creating milk rate chart...");
   const rateCharts = [
     {
@@ -549,82 +578,73 @@ async function main() {
     });
   }
 
-  // 7. Create Milk Procurement Entries
+  // 8. Create Milk Procurement Entries (sequential to avoid D1 connection limits)
   console.log("📝 Creating milk procurement entries...");
-  const procurementEntries = [];
 
-  // Create entries for last 30 days
+  // Create entries for last 30 days - sequential for D1 compatibility
   for (let day = 30; day >= 0; day--) {
     // Supplier 1 - Morning collection
-    procurementEntries.push(
-      prisma.milkProcurementEntry.create({
-        data: {
-          supplierId: supplier1.id,
-          collectionCenterId: center1.id,
-          datetime: daysAgo(day),
-          quantityL: 500 + Math.random() * 200,
-          fatPercent: 3.5 + Math.random() * 0.5,
-          snfPercent: 8.5 + Math.random() * 0.3,
-          clrReading: 28 + Math.random() * 2,
-          temperatureC: 4 + Math.random() * 2,
-          qualityGrade: "A",
-          ratePerLitre: 35,
-          totalAmount: 35 * (500 + Math.random() * 200),
-          paymentStatus: day < 7 ? "PAID" : "PENDING",
-          milkType: "COW",
-          createdAt: daysAgo(day),
-        },
-      })
-    );
+    await prisma.milkProcurementEntry.create({
+      data: {
+        supplierId: supplier1.id,
+        collectionCenterId: center1.id,
+        datetime: daysAgo(day),
+        quantityL: 500 + Math.random() * 200,
+        fatPercent: 3.5 + Math.random() * 0.5,
+        snfPercent: 8.5 + Math.random() * 0.3,
+        clrReading: 28 + Math.random() * 2,
+        temperatureC: 4 + Math.random() * 2,
+        qualityGrade: "A",
+        ratePerLitre: 35,
+        totalAmount: 35 * (500 + Math.random() * 200),
+        paymentStatus: day < 7 ? "PAID" : "PENDING",
+        milkType: "COW",
+        createdAt: daysAgo(day),
+      },
+    });
 
     // Supplier 1 - Evening collection
-    procurementEntries.push(
-      prisma.milkProcurementEntry.create({
-        data: {
-          supplierId: supplier1.id,
-          collectionCenterId: center1.id,
-          datetime: daysAgo(day) - 3600 * 12, // 12 hours later
-          quantityL: 450 + Math.random() * 150,
-          fatPercent: 3.6 + Math.random() * 0.4,
-          snfPercent: 8.6 + Math.random() * 0.3,
-          clrReading: 28.5 + Math.random() * 1.5,
-          temperatureC: 5 + Math.random() * 2,
-          qualityGrade: "A",
-          ratePerLitre: 35,
-          totalAmount: 35 * (450 + Math.random() * 150),
-          paymentStatus: day < 7 ? "PAID" : "PENDING",
-          milkType: "COW",
-          createdAt: daysAgo(day) - 3600 * 12,
-        },
-      })
-    );
+    await prisma.milkProcurementEntry.create({
+      data: {
+        supplierId: supplier1.id,
+        collectionCenterId: center1.id,
+        datetime: daysAgo(day) - 3600 * 12,
+        quantityL: 450 + Math.random() * 150,
+        fatPercent: 3.6 + Math.random() * 0.4,
+        snfPercent: 8.6 + Math.random() * 0.3,
+        clrReading: 28.5 + Math.random() * 1.5,
+        temperatureC: 5 + Math.random() * 2,
+        qualityGrade: "A",
+        ratePerLitre: 35,
+        totalAmount: 35 * (450 + Math.random() * 150),
+        paymentStatus: day < 7 ? "PAID" : "PENDING",
+        milkType: "COW",
+        createdAt: daysAgo(day) - 3600 * 12,
+      },
+    });
 
     // Supplier 2 - Evening collection only
-    procurementEntries.push(
-      prisma.milkProcurementEntry.create({
-        data: {
-          supplierId: supplier2.id,
-          collectionCenterId: center2.id,
-          datetime: daysAgo(day) - 3600 * 14,
-          quantityL: 300 + Math.random() * 100,
-          fatPercent: 5.5 + Math.random() * 1.0,
-          snfPercent: 9.0 + Math.random() * 0.5,
-          clrReading: 29 + Math.random() * 1,
-          temperatureC: 4 + Math.random() * 1.5,
-          qualityGrade: "A",
-          ratePerLitre: 48,
-          totalAmount: 48 * (300 + Math.random() * 100),
-          paymentStatus: day < 7 ? "PAID" : "PENDING",
-          milkType: "BUFFALO",
-          createdAt: daysAgo(day) - 3600 * 14,
-        },
-      })
-    );
+    await prisma.milkProcurementEntry.create({
+      data: {
+        supplierId: supplier2.id,
+        collectionCenterId: center2.id,
+        datetime: daysAgo(day) - 3600 * 14,
+        quantityL: 300 + Math.random() * 100,
+        fatPercent: 5.5 + Math.random() * 1.0,
+        snfPercent: 9.0 + Math.random() * 0.5,
+        clrReading: 29 + Math.random() * 1,
+        temperatureC: 4 + Math.random() * 1.5,
+        qualityGrade: "A",
+        ratePerLitre: 48,
+        totalAmount: 48 * (300 + Math.random() * 100),
+        paymentStatus: day < 7 ? "PAID" : "PENDING",
+        milkType: "BUFFALO",
+        createdAt: daysAgo(day) - 3600 * 14,
+      },
+    });
   }
 
-  await Promise.all(procurementEntries);
-
-  // 8. Create Products
+  // 9. Create Products
   console.log("🧈 Creating products...");
   const fullCreamMilk = await prisma.product.create({
     data: {
@@ -754,7 +774,7 @@ async function main() {
     },
   });
 
-  // 9. Create Product Price History
+  // 10. Create Product Price History
   console.log("📊 Creating product price history...");
   await prisma.productPriceHistory.create({
     data: {
@@ -776,7 +796,7 @@ async function main() {
     },
   });
 
-  // 10. Create Storage Locations
+  // 11. Create Storage Locations
   console.log("🏭 Creating storage locations...");
   const coldRoom1 = await prisma.storageLocation.create({
     data: {
@@ -817,7 +837,7 @@ async function main() {
     },
   });
 
-  // 11. Create Production Batches
+  // 12. Create Production Batches
   console.log("🏭 Creating production batches...");
   const batch1 = await prisma.productionBatch.create({
     data: {
@@ -876,7 +896,7 @@ async function main() {
     },
   });
 
-  // 12. Create Inventory Stocks
+  // 13. Create Inventory Stocks
   console.log("📦 Creating inventory stocks...");
   const stock1 = await prisma.inventoryStock.create({
     data: {
@@ -914,7 +934,7 @@ async function main() {
     },
   });
 
-  // 13. Create Inventory Transactions
+  // 14. Create Inventory Transactions
   console.log("📝 Creating inventory transactions...");
   await prisma.inventoryTransaction.create({
     data: {
@@ -938,7 +958,7 @@ async function main() {
     },
   });
 
-  // 14. Create Quality Tests
+  // 15. Create Quality Tests
   console.log("🔬 Creating quality tests...");
   await prisma.qualityTest.create({
     data: {
@@ -976,7 +996,7 @@ async function main() {
     },
   });
 
-  // 15. Create Sales Inquiries
+  // 16. Create Sales Inquiries
   console.log("📞 Creating sales inquiries...");
   const inquiry1 = await prisma.salesInquiry.create({
     data: {
@@ -1004,7 +1024,7 @@ async function main() {
     },
   });
 
-  // 16. Create Quotations
+  // 17. Create Quotations
   console.log("💼 Creating quotations...");
   const quote1 = await prisma.quotation.create({
     data: {
@@ -1060,7 +1080,7 @@ async function main() {
     },
   });
 
-  // 17. Create Sales Orders
+  // 18. Create Sales Orders
   console.log("📋 Creating sales orders...");
   const order1 = await prisma.salesOrder.create({
     data: {
@@ -1142,7 +1162,7 @@ async function main() {
     },
   });
 
-  // 18. Create Invoices
+  // 19. Create Invoices
   console.log("🧾 Creating invoices...");
   const invoice1 = await prisma.invoice.create({
     data: {
@@ -1180,7 +1200,7 @@ async function main() {
     },
   });
 
-  // 19. Create Payments
+  // 20. Create Payments
   console.log("💳 Creating payments...");
   await prisma.payment.create({
     data: {
@@ -1206,7 +1226,7 @@ async function main() {
     },
   });
 
-  // 20. Create Delivery Challans
+  // 21. Create Delivery Challans
   console.log("🚚 Creating delivery challans...");
   await prisma.deliveryChallan.create({
     data: {
@@ -1236,7 +1256,7 @@ async function main() {
     },
   });
 
-  // 21. Create Purchase Orders
+  // 22. Create Purchase Orders
   console.log("📦 Creating purchase orders...");
   await prisma.purchaseOrder.create({
     data: {
@@ -1262,7 +1282,7 @@ async function main() {
     },
   });
 
-  // 22. Create Bills
+  // 23. Create Bills
   console.log("💵 Creating bills...");
   await prisma.bill.create({
     data: {
@@ -1286,7 +1306,7 @@ async function main() {
     },
   });
 
-  // 23. Create Support Tickets
+  // 24. Create Support Tickets
   console.log("🎫 Creating support tickets...");
   const ticket1 = await prisma.supportTicket.create({
     data: {
@@ -1310,7 +1330,7 @@ async function main() {
     },
   });
 
-  // 24. Create Ticket Comments
+  // 25. Create Ticket Comments
   console.log("💬 Creating ticket comments...");
   await prisma.ticketComment.create({
     data: {
@@ -1356,7 +1376,7 @@ async function main() {
     },
   });
 
-  // 25. Create Supplier Feedback
+  // 26. Create Supplier Feedback
   console.log("📝 Creating supplier feedback...");
   await prisma.supplierFeedback.create({
     data: {
@@ -1376,7 +1396,7 @@ async function main() {
     },
   });
 
-  // 26. Create Activities
+  // 27. Create Activities
   console.log("📊 Creating activities...");
   await prisma.activity.create({
     data: {
@@ -1412,7 +1432,7 @@ async function main() {
     },
   });
 
-  // 27. Create Documents
+  // 28. Create Documents
   console.log("📄 Creating documents...");
   await prisma.document.create({
     data: {
@@ -1450,7 +1470,7 @@ async function main() {
     },
   });
 
-  // 28. Create Notifications
+  // 29. Create Notifications
   console.log("🔔 Creating notifications...");
   await prisma.notification.create({
     data: {
@@ -1492,7 +1512,7 @@ async function main() {
     },
   });
 
-  // 29. Create Sales Targets
+  // 30. Create Sales Targets
   console.log("🎯 Creating sales targets...");
   await prisma.salesTarget.create({
     data: {
@@ -1512,7 +1532,7 @@ async function main() {
     },
   });
 
-  // 30. Create Commission Rules
+  // 31. Create Commission Rules
   console.log("💰 Creating commission rules...");
   await prisma.commissionRule.create({
     data: {
@@ -1541,7 +1561,7 @@ async function main() {
     },
   });
 
-  // 31. Create Commissions
+  // 32. Create Commissions
   console.log("💵 Creating commissions...");
   await prisma.commission.create({
     data: {
@@ -1561,7 +1581,7 @@ async function main() {
     },
   });
 
-  // 32. Create Audit Logs
+  // 33. Create Audit Logs
   console.log("📝 Creating audit logs...");
   await prisma.auditLog.create({
     data: {
@@ -1610,8 +1630,132 @@ async function main() {
     },
   });
 
+  // 34. Production telemetry scaffolding
+  console.log("⚙️ Seeding production telemetry scaffolding...");
+
+  const stageTemplate = [
+    { stageName: "MILK_ARRIVAL", status: "COMPLETED" },
+    { stageName: "PLATFORM_TEST", status: "COMPLETED" },
+    { stageName: "CREAM_SEPARATION", status: "COMPLETED" },
+    { stageName: "STANDARDIZATION", status: "COMPLETED" },
+    { stageName: "PASTEURIZATION", status: "COMPLETED" },
+    { stageName: "HOMOGENIZATION", status: "COMPLETED" },
+    { stageName: "PRODUCT_MANUFACTURING", status: "IN_PROGRESS" },
+    { stageName: "PACKAGING_HANDOFF", status: "PENDING" },
+  ];
+
+  // Create production stage logs sequentially for D1 compatibility
+  for (const batch of [batch1, batch2]) {
+    for (let index = 0; index < stageTemplate.length; index++) {
+      const stage = stageTemplate[index];
+      await prisma.productionStageLog.create({
+        data: {
+          organizationId: primaryOrg.id,
+          batchId: batch.id,
+          stageName: stage.stageName,
+          status: stage.status,
+          startedAt: daysAgo(Math.max(0, 2 - index)),
+          completedAt:
+            stage.status === "COMPLETED"
+              ? daysAgo(Math.max(0, 2 - index))
+              : null,
+          recordedById: productionSupervisor.id,
+          parameters: JSON.stringify({ operator: "Seeder" }),
+        },
+      });
+    }
+  }
+
+  const pouchLine = await prisma.packagingLine.create({
+    data: {
+      organizationId: primaryOrg.id,
+      name: "Pouch Line 01",
+      lineType: "POUCH",
+      speedUnitsPerHour: 9000,
+      isActive: 1,
+    },
+  });
+
+  const cupLine = await prisma.packagingLine.create({
+    data: {
+      organizationId: primaryOrg.id,
+      name: "Cup Line 02",
+      lineType: "CUP",
+      speedUnitsPerHour: 4200,
+      isActive: 1,
+    },
+  });
+
+  const pouchRun = await prisma.packagingRun.create({
+    data: {
+      organizationId: primaryOrg.id,
+      batchId: batch2.id,
+      packagingLineId: pouchLine.id,
+      operatorId: productionSupervisor.id,
+      status: "COMPLETED",
+      startedAt: daysAgo(1),
+      completedAt: daysAgo(1),
+      plannedOutput: 9000,
+      actualOutput: 8800,
+      rejectsCount: 120,
+      materialUsedKg: 110,
+    },
+  });
+
+  await prisma.packagingOutput.create({
+    data: {
+      organizationId: primaryOrg.id,
+      packagingRunId: pouchRun.id,
+      productId: tonedMilk.id,
+      packType: "Pouch 1L",
+      filledUnits: 8700,
+      rejectedUnits: 120,
+      materialUsedKg: 108,
+      recordedAt: daysAgo(1),
+    },
+  });
+
+  await prisma.machineTelemetry.create({
+    data: {
+      organizationId: primaryOrg.id,
+      packagingLineId: pouchLine.id,
+      machineType: "PACKAGING",
+      machineId: "PouchComp-1",
+      parameter: "LINE_SPEED",
+      value: 8200,
+      unit: "UPH",
+      recordedAt: daysAgo(1),
+      notes: "Average speed during seeded run",
+    },
+  });
+
+  await prisma.processAlert.create({
+    data: {
+      organizationId: primaryOrg.id,
+      batchId: batch2.id,
+      packagingRunId: pouchRun.id,
+      alertType: "PACKAGING_REJECTS",
+      severity: "WARNING",
+      message: "Reject ratio exceeded 1.5% during seeded run",
+      createdAt: daysAgo(1),
+    },
+  });
+
+  await prisma.packagingRun.create({
+    data: {
+      organizationId: primaryOrg.id,
+      batchId: batch3.id,
+      packagingLineId: cupLine.id,
+      operatorId: productionSupervisor.id,
+      status: "RUNNING",
+      startedAt: daysAgo(0),
+      plannedOutput: 4800,
+    },
+  });
+
   console.log("✅ Seed completed successfully!");
   console.log("\n📊 Summary:");
+  console.log("- Organization: 1");
   console.log("- Roles: 6");
   console.log("- Departments: 5");
   console.log("- Users: 6");
@@ -1619,10 +1763,13 @@ async function main() {
   console.log("- Products: 6");
   console.log("- Production Batches: 3");
   console.log("- Milk Collection Centers: 2");
-  console.log("- Milk Procurement Entries: ~90 (30 days of data)");
+  console.log("- Milk Procurement Entries: ~93 (31 days of data)");
   console.log("- Sales Orders: 3");
   console.log("- Invoices: 3");
   console.log("- Support Tickets: 2");
+  console.log("- Production Stage Logs: 16");
+  console.log("- Packaging Lines: 2");
+  console.log("- Packaging Runs: 2");
   console.log("- And much more...");
 }
 
